@@ -85,7 +85,7 @@ export default function SnapScreen() {
         <div className="flex justify-between items-center w-full">
           <button
             onClick={() => router.push("/marketplace")}
-            className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform"
+            className="w-9 h-9 rounded-full bg-black/80 flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform"
           >
             <span className="material-symbols-outlined text-lg">close</span>
           </button>
@@ -93,8 +93,8 @@ export default function SnapScreen() {
           <div className="flex gap-2">
             <button
               onClick={() => setIsFlashOn(!isFlashOn)}
-              className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center border border-white/10 active:scale-90 transition-transform ${
-                isFlashOn ? "bg-amber-400 text-black" : "bg-black/40 text-white"
+              className={`w-9 h-9 rounded-full flex items-center justify-center border border-white/10 active:scale-90 transition-transform ${
+                isFlashOn ? "bg-amber-400 text-black" : "bg-black/80 text-white"
               }`}
             >
               <span className="material-symbols-outlined text-lg">
@@ -103,7 +103,7 @@ export default function SnapScreen() {
             </button>
             <button
               onClick={requestCamera}
-              className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform"
+              className="w-9 h-9 rounded-full bg-black/80 flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform"
             >
               <span className="material-symbols-outlined text-lg">
                 cameraswitch
@@ -113,7 +113,7 @@ export default function SnapScreen() {
         </div>
 
         <div className="flex justify-center w-full">
-          <div className="bg-[#1D2023]/70 backdrop-blur-md border border-[#00eefc]/30 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-[0_4px_16px_rgba(0,238,252,0.15)] select-none">
+          <div className="bg-[#1D2023]/95 border border-[#00eefc]/30 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-[0_4px_16px_rgba(0,238,252,0.15)] select-none">
             <div className="relative flex items-center justify-center w-2 h-2">
               <div className="absolute w-full h-full bg-[#00eefc] rounded-full animate-ping opacity-75"></div>
               <div className="relative w-2 h-2 rounded-full bg-[#00eefc]"></div>
@@ -129,7 +129,7 @@ export default function SnapScreen() {
 
         {isRecording && (
           <div className="flex justify-center w-full mt-1">
-            <div className="bg-[#ff5540]/20 border border-[#ff5540]/50 backdrop-blur-md rounded-md px-3 py-1 flex items-center gap-1.5">
+            <div className="bg-[#ff5540]/40 border border-[#ff5540]/50 rounded-md px-3 py-1 flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-[#ff5540] animate-pulse"></div>
               <span className="text-xs font-mono font-bold text-[#ffb4a8] tracking-widest">
                 00:{recordingSeconds.toString().padStart(2, "0")}
@@ -195,7 +195,7 @@ export default function SnapScreen() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white overflow-hidden active:scale-95 transition-transform"
+            className="w-12 h-12 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-white overflow-hidden active:scale-95 transition-transform"
           >
             <span className="material-symbols-outlined text-xl">
               photo_library
@@ -237,7 +237,7 @@ export default function SnapScreen() {
 
           <button
             onClick={requestCamera}
-            className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white active:scale-95 transition-transform"
+            className="w-12 h-12 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-white active:scale-95 transition-transform"
           >
             <span className="material-symbols-outlined text-xl">
               cameraswitch
