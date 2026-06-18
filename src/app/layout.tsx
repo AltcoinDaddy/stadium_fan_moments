@@ -32,6 +32,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+import PrivyProviderWrapper from "@/providers/PrivyProviderWrapper";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -50,7 +52,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#0B0E11" />
       </head>
       <body className="min-h-full bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
-        {children}
+        <PrivyProviderWrapper>{children}</PrivyProviderWrapper>
       </body>
     </html>
   );
