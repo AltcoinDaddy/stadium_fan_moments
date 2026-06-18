@@ -42,7 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${plusJakartaSans.variable} h-full dark antialiased`}
+      className={`${sora.variable} ${plusJakartaSans.variable} h-full overflow-x-hidden dark antialiased`}
     >
       <head>
         <link
@@ -51,7 +51,7 @@ export default function RootLayout({
         />
         <meta name="theme-color" content="#0B0E11" />
       </head>
-      <body className="min-h-full bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+      <body className="min-h-full overflow-x-hidden bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
         <PrivyProviderWrapper>{children}</PrivyProviderWrapper>
       </body>
     </html>

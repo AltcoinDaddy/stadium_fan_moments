@@ -77,8 +77,11 @@ export const createCameraSlice: StateCreator<
     setVideoElement: (videoElement) => {
       set({ videoElement });
       if (videoElement && streamRef) {
-        videoElement.srcObject = streamRef;
-        videoElement.play().catch(console.warn);
+        if (videoElement.srcObject !== streamRef) {
+          videoElement.srcObject = streamRef;
+        }
+        videoElement.muted = true;
+        videoElement.play().catch((err) => console.warn("play err:", err));
       }
     },
 
@@ -127,12 +130,12 @@ export const createCameraSlice: StateCreator<
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: currentMode },
-            audio: true,
+            audio: false, // Audio request causes significant delays on mobile
           });
         } catch (e) {
           stream = await navigator.mediaDevices.getUserMedia({
             video: true,
-            audio: true,
+            audio: false,
           });
         }
         
@@ -140,10 +143,12 @@ export const createCameraSlice: StateCreator<
         set({ cameraPermission: "granted" });
         const el = get().videoElement;
         if (el) {
-          el.srcObject = stream;
+          if (el.srcObject !== stream) {
+            el.srcObject = stream;
+          }
           el.muted = true; // prevent feedback loop on local playback
           el.play().catch((err) =>
-            console.log("Video playback delayed:", err)
+            console.warn("Video playback delayed:", err)
           );
         }
       } catch (err) {
