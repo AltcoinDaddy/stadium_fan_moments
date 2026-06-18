@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>What's Hot - MATCHDAY</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#111417",
+                    "secondary-fixed": "#7df4ff",
+                    "inverse-on-surface": "#2e3134",
+                    "outline": "#b18780",
+                    "tertiary-fixed": "#dee2ec",
+                    "on-secondary-fixed": "#002022",
+                    "primary-fixed-dim": "#ffb4a8",
+                    "primary-container": "#ff5540",
+                    "on-surface": "#e1e2e7",
+                    "inverse-primary": "#c00100",
+                    "on-primary-fixed-variant": "#930100",
+                    "secondary": "#d3fbff",
+                    "on-primary-fixed": "#410000",
+                    "error": "#ffb4ab",
+                    "tertiary-container": "#8c919a",
+                    "on-secondary": "#00363a",
+                    "error-container": "#93000a",
+                    "surface-container": "#1d2023",
+                    "secondary-container": "#00eefc",
+                    "on-secondary-container": "#00686f",
+                    "on-tertiary": "#2c3138",
+                    "outline-variant": "#603e39",
+                    "surface-tint": "#ffb4a8",
+                    "on-tertiary-fixed-variant": "#42474f",
+                    "on-background": "#e1e2e7",
+                    "surface-container-highest": "#323538",
+                    "tertiary": "#c2c7d0",
+                    "on-primary": "#690100",
+                    "on-surface-variant": "#ebbbb4",
+                    "surface": "#111417",
+                    "surface-dim": "#111417",
+                    "on-tertiary-fixed": "#171c23",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-high": "#272a2e",
+                    "surface-container-low": "#191c1f",
+                    "inverse-surface": "#e1e2e7",
+                    "surface-bright": "#37393d",
+                    "on-error": "#690005",
+                    "secondary-fixed-dim": "#00dbe9",
+                    "primary": "#ffb4a8",
+                    "on-tertiary-container": "#252a31",
+                    "tertiary-fixed-dim": "#c2c7d0",
+                    "surface-variant": "#323538",
+                    "surface-container-lowest": "#0b0e11",
+                    "on-secondary-fixed-variant": "#004f54",
+                    "on-primary-container": "#5c0000",
+                    "primary-fixed": "#ffdad4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "margin-mobile": "16px",
+                    "lg": "24px",
+                    "sm": "12px",
+                    "md": "16px",
+                    "xl": "32px",
+                    "xs": "4px",
+                    "gutter-mobile": "12px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Sora", "sans-serif"],
+                    "body-lg": ["Plus Jakarta Sans", "sans-serif"],
+                    "display-lg": ["Sora", "sans-serif"],
+                    "label-md": ["Plus Jakarta Sans", "sans-serif"],
+                    "body-md": ["Plus Jakarta Sans", "sans-serif"],
+                    "headline-md": ["Sora", "sans-serif"],
+                    "headline-lg": ["Sora", "sans-serif"],
+                    "label-sm": ["Plus Jakarta Sans", "sans-serif"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #0B0E11; /* Using Level 0 background directly to ensure dark mode base */
+        }
+        /* Custom scrollbar for horizontal scrolling lists */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .glow-red {
+            box-shadow: 0 4px 20px rgba(255,85,64,0.2);
+        }
+        
+        .glass-container {
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-surface font-body-md antialiased pb-[120px]">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 shadow-md">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-white/10">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATIlbXRYLI6W7gpjDeotA4NXlkHUg2D5YQZl0Lo6mOjoyngIr_w3qkuoXZ7MFG6mfNsnHLjQ7RP_sQb4lIi1lPAY4f0ko04RvG1DfEiY8SfRONo4wFSoe6HyvLAkLLyYjV96uBS96_X8EjFaCytYljOw3BTH0mAsV8-1Zb7QUeCU0OutJoiPH4zaPJ22xzoWts6sKesbztpCCrdh6d-8t_KyeM33549z244xixPRXvi5RytLxeUD00jne-ZXQ23nWeUwauzSXRjAM"/>
+</div>
+<h1 class="text-headline-md-mobile font-headline-lg-mobile tracking-tighter text-primary dark:text-primary">MATCHDAY</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest/50 transition-colors text-primary dark:text-primary-fixed-dim">
+<span class="material-symbols-outlined" data-icon="sports_soccer">sports_soccer</span>
+</button>
+</header>
+<!-- Main Content Area -->
+<main class="pt-24 px-margin-mobile flex flex-col gap-lg">
+<!-- Header Section -->
+<section class="flex flex-col gap-xs">
+<div class="flex items-center gap-xs text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<h2 class="text-headline-md font-headline-md uppercase tracking-wide">Trending Now</h2>
+</div>
+<p class="text-body-md font-body-md text-tertiary">The most active matches and rapidly rising moments.</p>
+</section>
+<!-- Hot Matches Horizontal Scroll -->
+<section>
+<h3 class="text-label-md font-label-md text-on-surface-variant mb-sm uppercase">Live Hot Matches</h3>
+<div class="flex gap-sm overflow-x-auto no-scrollbar pb-xs -mx-margin-mobile px-margin-mobile">
+<!-- Match Card 1 -->
+<div class="flex-none w-[280px] glass-container rounded-DEFAULT p-md flex flex-col gap-sm relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-1 bg-surface-container">
+<div class="h-full bg-primary-container w-[75%] rounded-r-full shadow-[0_0_10px_rgba(255,85,64,0.6)]"></div>
+</div>
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-xs bg-surface-container-high px-2 py-1 rounded text-label-sm font-label-sm text-primary">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+                            75' LIVE
+                        </div>
+<div class="text-label-md font-label-md text-secondary-container flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">photo_camera</span>
+                            12.4k
+                        </div>
+</div>
+<div class="flex justify-between items-center mt-2">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center overflow-hidden">
+<img alt="Team A Logo" class="w-full h-full object-cover opacity-80" data-alt="A stylized logo for a fictional sports team featuring a red and black color scheme with aggressive typography. Set against a dark, stadium-lit background to emphasize a high-energy, premium aesthetic. High contrast modernism style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQVRNhXUUdGoLBRHqQ5IcJZX4Y1zeZ9MN4VeboVwu8DQaxgqBIau0JW5NTZsODEx0-yopZRVL0UAi7veCL1eTa01xaFiZbAfWMHawz7a_u6QVIw2QZufOb1pTvTAnhvEalCCmz3mWWaTQCx3SFDSXfc6_L5zk-x0Qracl5-lpXdBUTpKptXYTqlDcp09jk2nc949mKOF-27d9JHSwZ0hgIdEJWzuPWRky_oHW8e3qyXGZ3FizdmnmIU2CLdyt6VGEvp-fezH5bShQ"/>
+</div>
+<span class="text-label-md font-label-md font-bold text-on-surface">MCI</span>
+</div>
+<div class="text-headline-lg font-headline-lg font-bold text-on-surface flex gap-2">
+<span>2</span> <span class="text-surface-variant">-</span> <span>1</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center overflow-hidden">
+<img alt="Team B Logo" class="w-full h-full object-cover opacity-80" data-alt="A stylized logo for a fictional sports team featuring a blue and white color scheme with sleek, modern geometry. Set against a dark, stadium-lit background to emphasize a high-energy, premium aesthetic. High contrast modernism style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGrXlVTLb4MxMvgt8kSdHi2M9jMaLykBileLseQoPDgingZP_uEuTwycGoP7itWfUDUsBwuBCgkuicLg8qaH82WmEJzBBeWw1r9jobGdPFn3qJvDAdUpzDhCCqBIZG-ub9u2VLBGDP2dHD93o4GilZHZyuzDuhYyq_MPAGqsZTgNid6XwywDvEY1wv6cK6h-bYFa0zg_7TPu-reyjWq-XpNb4RX2TToylesH6gyb-3N8sNy2vpxuiPP6219IZvlC1XcfnpqdfU7nw"/>
+</div>
+<span class="text-label-md font-label-md font-bold text-on-surface">ARS</span>
+</div>
+</div>
+</div>
+<!-- Match Card 2 -->
+<div class="flex-none w-[280px] glass-container rounded-DEFAULT p-md flex flex-col gap-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-surface-container">
+<div class="h-full bg-primary-container w-[40%] rounded-r-full shadow-[0_0_10px_rgba(255,85,64,0.6)]"></div>
+</div>
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-xs bg-surface-container-high px-2 py-1 rounded text-label-sm font-label-sm text-primary">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+                            40' LIVE
+                        </div>
+<div class="text-label-md font-label-md text-secondary-container flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">photo_camera</span>
+                            8.2k
+                        </div>
+</div>
+<div class="flex justify-between items-center mt-2">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center overflow-hidden">
+<img alt="Team C Logo" class="w-full h-full object-cover opacity-80" data-alt="A stylized logo for a fictional sports team featuring a black and yellow color scheme with a prominent crest. Set against a dark, stadium-lit background to emphasize a high-energy, premium aesthetic. High contrast modernism style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXtk3vrKhvHek1DyFRt4uh_rUGihM0A_HAaYF5D1L5YuRxDk1VxhCcyD3UBb2mgaaWCVL0zdxsBmWsMfVgKG2-YiA2KOeNnbGbyxvEfvG2uSBLqZSEZlUnqZbhBRY_yciRAMhqjru89V68Qplzy9e8O8ijNkm5g3U3YXbV1Dxr4SqFtn0nm915tOKgVFeKTRUvV_sd47iqFkYEEVVtYKf2uBBFKfCX2_3g3TQBNlehsi7tJ9b2KqTaIEZbk5XsOV8Es5uxhYsU38c"/>
+</div>
+<span class="text-label-md font-label-md font-bold text-on-surface">RMA</span>
+</div>
+<div class="text-headline-lg font-headline-lg font-bold text-on-surface flex gap-2">
+<span>0</span> <span class="text-surface-variant">-</span> <span>0</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center overflow-hidden">
+<img alt="Team D Logo" class="w-full h-full object-cover opacity-80" data-alt="A stylized logo for a fictional sports team featuring a red and blue color scheme. Set against a dark, stadium-lit background to emphasize a high-energy, premium aesthetic. High contrast modernism style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvnNfGdW3hL-x3Hq0o-0aV_w9_GSKvbgHxOkq8vZL6EUGI_X9C8WJq27ukImBI37kPZrVSRO2R4sKefW1ZRRvAjLfoBFYsJIeQJqe1idVQ5YDssL9qZnwyVParuI6CFesYd9KxLp07627K9xgJr2-9WhgAXohI-UMIcsd9bXnHDbdYrTssjgbpZvkXDxKem6vhPp4mlKYnkdui1NTWi4i8v0omRpVyD-hxKBhv9OFAaE1C_wgqsMU48ZB-xnkTEKDK4vnd7Z-iRgU"/>
+</div>
+<span class="text-label-md font-label-md font-bold text-on-surface">FCB</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Trending Moments Bento Grid -->
+<section>
+<div class="flex justify-between items-end mb-sm">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase">Spiking Moments</h3>
+<span class="text-label-sm font-label-sm text-secondary-container">View All</span>
+</div>
+<div class="grid grid-cols-2 gap-gutter-mobile">
+<!-- Hero Moment Card -->
+<div class="col-span-2 relative rounded-DEFAULT overflow-hidden group glow-red h-64 border border-white/10">
+<img alt="Hero Moment" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A dynamic action shot of a soccer player mid-air, attempting a bicycle kick under bright stadium floodlights. The background is slightly blurred to emphasize speed and athleticism. Deep blacks and vibrant atmospheric lighting create a premium, high-energy digital collectible feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7hqojVaP9WSXmnL9OSYdc7RNbd5xvNLxCl2TM_9AeMsC05XM_QzY-Ljac8KFMQCDF2LI8jmo0SEezREYJGRR_5AULBHsDteMO7bNXeC5KFuJ55ucdG0TiNAkGmUB2Nq_o2eFuFYWLjbFuc-BgkWckm2XxIJEZJrC2Tv2Rs9sxws7EZn0AnqmF7VB7Xpp8XypoYDGgQW8OluZB9ZoD6phCNRs3d0B2aF66W7MNVb62--mZ06C8HT5CYm4WuBsgGk1K3negayEyBYU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
+<div class="absolute top-sm right-sm flex gap-xs">
+<span class="bg-surface-container-highest/80 backdrop-blur px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase border border-primary-container text-primary">Epic</span>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-md flex flex-col gap-1">
+<div class="flex justify-between items-end">
+<div>
+<h4 class="text-headline-md font-headline-md font-bold text-on-surface leading-tight">Haaland Bicycle Kick</h4>
+<p class="text-label-md font-label-md text-tertiary">MCI vs ARS • 62'</p>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-label-sm font-label-sm text-secondary-container">+24%</span>
+<span class="text-body-md font-body-md font-bold text-on-surface">1,450 CHZ</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Moment Card 1 -->
+<div class="relative rounded-DEFAULT overflow-hidden group h-48 border border-white/10 glass-container">
+<img alt="Secondary Moment 1" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-60" data-alt="A close-up dramatic shot of a soccer goalkeeper making a diving save at full stretch. Stadium lights reflect off the grass. The composition uses deep contrast and subtle glowing highlights to feel like a rare digital trading card." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWMAnXAgf01TZPkooLFYWQ9wfUvCkf3TS9Wxt5VfXItK2g-NhFB2-_6cyjAUf-WAmLeRnXmVLHKelKkRvnif4bBEW6rum4kpo-aZYe0s8OxILHuhfqqjYuaRhccKE21Opk9u5tOPrDmUfFkBUWSUzlsyRIj3UvGiFa_eY4Ne9WowYmeqSSMgexDNTuKg49DMmWiXMEHURdKIOFxJuXzBg7l5mEGyR-ZjriZoWevcu3cibmDxNskBAALCeM5Xwf0vRdV7BmMk1ItKs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+<div class="absolute top-xs right-xs">
+<span class="bg-surface-container-highest/80 backdrop-blur px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase border border-secondary text-secondary">Rare</span>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-sm flex flex-col gap-1">
+<h4 class="text-body-md font-body-md font-bold text-on-surface leading-tight">Alisson Save</h4>
+<div class="flex justify-between items-center mt-1">
+<span class="text-[10px] font-label-sm text-tertiary">#402/1000</span>
+<span class="text-label-md font-label-md text-secondary-container">+12%</span>
+</div>
+</div>
+</div>
+<!-- Secondary Moment Card 2 -->
+<div class="relative rounded-DEFAULT overflow-hidden group h-48 border border-white/10 glass-container">
+<img alt="Secondary Moment 2" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-60" data-alt="A wide angle shot of a soccer player celebrating a goal in front of a massive, blurred crowd. Confetti falls slightly in the atmospheric stadium lighting. Designed to look like a high-end digital sports collectible." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4971bJs2OlZD83ezWxo8-F77PTDzYFgu28GCJ-2IdpmOQM62tqJzxs8Gd9awqK3NXLUHq6zppekGzQBKP0lHI6WrMEIDxu83D81-HdhqGk4D1-35Tv6qggkzwXRum3WpznZrD8Wt5epWYf6TRpz88D-Vr7VfcrZ-IxMiTjlbRGPMP2awa4xrTWeZzcbIFc584xwYHWJ3jJKWrLPHHps9lKhY1j3IcE0cIG_uv5Fv-c-hd4mrfh4J2Nu8xCswey0jklvwsHuopG5c"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+<div class="absolute top-xs right-xs">
+<span class="bg-surface-container-highest/80 backdrop-blur px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase border border-white/20 text-on-surface">Core</span>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-sm flex flex-col gap-1">
+<h4 class="text-body-md font-body-md font-bold text-on-surface leading-tight">Messi Free Kick</h4>
+<div class="flex justify-between items-center mt-1">
+<span class="text-[10px] font-label-sm text-tertiary">#1024/5000</span>
+<span class="text-label-md font-label-md text-secondary-container">+8%</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-xl pb-8 h-20 bg-surface-container/90 dark:bg-surface-container/90 backdrop-blur-20px rounded-t-lg shadow-[0_-4px_20px_rgba(0,238,252,0.1)] md:hidden">
+<a class="flex flex-col items-center justify-center text-tertiary p-2 hover:text-secondary-container transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+</a>
+<a class="flex flex-col items-center justify-center text-tertiary p-2 hover:text-secondary-container transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="photo_camera">photo_camera</span>
+</a>
+<!-- Active Tab: What's Hot maps to 'local_fire_department' -->
+<a class="flex items-center justify-center bg-primary-container text-on-primary-container rounded-full w-14 h-14 -mt-6 shadow-[0_0_15px_rgba(255,85,64,0.4)] scale-110 transition-all duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="local_fire_department" data-weight="fill" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</a>
+</nav>
+</body></html>
