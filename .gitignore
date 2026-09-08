@@ -32,6 +32,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.contract.example
+
+# Foundry artifacts and locally installed Solidity dependencies
+/broadcast/
+/cache/
+/out/
+/lib/
 
 # vercel
 .vercel

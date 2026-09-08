@@ -1,11 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store";
-import { MOCK_MATCHES } from "@/data/mockData";
+import type { Match } from "@/data/mockData";
 import MatchCard from "@/components/MatchCard";
 
 export default function TrendingScreen() {
   const moments = useAppStore((s) => s.moments);
+  const setSelectedMoment = useAppStore((s) => s.setSelectedMoment);
+  const router = useRouter();
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [leaderboard, setLeaderboard] = useState<Array<{ username: string; avatar: string; captures: number }>>([]);
+
+  useEffect(() => {
+    void fetch("/api/sports/matches").then((response) => response.ok ? response.json() : { matches: [] }).then((data) => setMatches(data.matches || [])).catch(() => setMatches([]));
+    void fetch("/api/leaderboard").then((response) => response.ok ? response.json() : { leaderboard: [] }).then((data) => setLeaderboard(data.leaderboard || [])).catch(() => setLeaderboard([]));
+  }, []);
 
   return (
     <div className="p-4 flex flex-col gap-5 animate-fade">
@@ -35,7 +46,7 @@ export default function TrendingScreen() {
         </div>
 
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
-          {MOCK_MATCHES.map((match) => (
+          {matches.map((match) => (
             <MatchCard key={match.id} match={match} />
           ))}
         </div>
@@ -53,44 +64,55 @@ export default function TrendingScreen() {
 
         <div className="grid grid-cols-2 gap-4">
           <div
-            onClick={() => {}}
+            onClick={() => {
+              if (!moments[0]) return;
+              setSelectedMoment(moments[0]);
+              router.push(`/detail?id=${encodeURIComponent(moments[0].id)}`);
+            }}
             className="col-span-full h-44 md:h-60 rounded-2xl overflow-hidden border border-white/10 relative group cursor-pointer flex flex-col justify-end p-4"
           >
             <img
-              src={moments[0].imageUrl}
-              alt="Spiker Hero"
+              src={moments[0]?.imageUrl || "/globe.svg"}
+              alt={moments[0]?.title || "No moments yet"}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent"></div>
 
             <span className="absolute top-3 right-3 bg-[#ff5540]/20 border border-[#ff5540]/40 px-2 py-0.5 rounded text-[9px] font-bold text-[#ff5540] uppercase tracking-wider">
-              Epic
+              {moments[0]?.rarity || "New"}
             </span>
 
             <div className="relative z-10 flex justify-between items-end">
               <div>
                 <h4 className="text-sm font-display font-black text-white uppercase tracking-wide">
-                  {moments[0].title}
+                  {moments[0]?.title || "No moments yet"}
                 </h4>
                 <p className="text-[11px] text-[#c2c7d0] font-medium">
-                  {moments[0].match} &bull; {moments[0].minute}
+                  {moments[0]
+                    ? `${moments[0].match} • ${moments[0].minute}`
+                    : "Upload the first stadium moment"}
                 </p>
               </div>
               <div className="flex flex-col items-end text-right">
                 <span className="text-xs font-mono font-bold text-green-400">
-                  +24%
+                  {moments[0] ? `${moments[0].views} views` : "—"}
                 </span>
                 <span className="text-xs font-mono font-bold text-white">
-                  {moments[0].price} {moments[0].tokenSymbol}
+                  {moments[0]
+                    ? `${moments[0].price} ${moments[0].tokenSymbol}`
+                    : "—"}
                 </span>
               </div>
             </div>
           </div>
 
-          {moments.slice(1, 3).map((moment, idx) => (
+          {moments.slice(1, 3).map((moment) => (
             <div
               key={moment.id}
-              onClick={() => {}}
+              onClick={() => {
+                setSelectedMoment(moment);
+                router.push(`/detail?id=${encodeURIComponent(moment.id)}`);
+              }}
               className="h-36 rounded-2xl overflow-hidden border border-white/10 relative group cursor-pointer flex flex-col justify-end p-3"
             >
               <img
@@ -119,7 +141,7 @@ export default function TrendingScreen() {
                     #{moment.serial.toString().padStart(4, "0")}
                   </span>
                   <span className="text-[11px] font-mono font-bold text-green-400">
-                    +{idx === 0 ? "12%" : "8%"}
+                    {moment.likes} likes
                   </span>
                 </div>
               </div>
@@ -136,38 +158,24 @@ export default function TrendingScreen() {
           Top Capturers Leaderboard
         </h3>
         <div className="flex flex-col gap-2.5 pt-1">
-          <div className="flex items-center justify-between text-sm py-1 border-b border-white/5">
+          {leaderboard.map((entry, index) => (
+          <div key={entry.username} className="flex items-center justify-between text-sm py-1 border-b border-white/5">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[#c2c7d0] font-bold w-4">1</span>
+              <span className="font-mono text-[#c2c7d0] font-bold w-4">{index + 1}</span>
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoQWEv1JjL9GDnCFZ_UsPpfINKPwPcDsH5iDRpzlbE6e92Z9MWbMHbKEz9UHheiojwvVcUkc45RQd-5uCJqgM_7SvYl3So5VnkiyTVKWSWQqMCRT0P4t1Pf0RL7T3jb4y4JbB7bAk7uvQryan0hxc3rqu6NZTVHHEF5A29jRptqFdLMpBLOBwzG_7DHmAW7jNhy7Aq05b3QAstPDUc4-KfTgfEDZvXL6gOqQCwQS8r40sFBUWrqnfjHOrK8WOhQFCQYfRU8dgh-Aw"
-                alt="UltrasParis99 avatar"
+                src={entry.avatar}
+                alt={`${entry.username} avatar`}
                 className="w-6 h-6 rounded-full object-cover"
               />
               <span className="text-white font-bold font-mono text-[12px]">
-                @UltrasParis99
+                @{entry.username}
               </span>
             </div>
             <span className="text-xs font-mono font-bold text-[#00eefc]">
-              2,450 CHZ
+              {entry.captures} captures
             </span>
           </div>
-          <div className="flex items-center justify-between text-sm py-1">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[#ff5540] font-bold w-4">2</span>
-              <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB21Vk8-t8OxW1hY0TSCFg51ZrJM2vUGAalifhd8KW47sO7hXlbRXF2cWPs23C6qc5Wcp9fOkxMWY9IJgmh8hc55DHW4tNvB1j9uwTPP_Knk_szfYzerYg9XA3cFnp4KxOoFaW4x4L3Q0KgH81gll89CVonozuM4ydtgyJHPbKDX73J85ygiRBrp2ccoGOIq8FwR4EGmFNTlNrIDt74niddDIQQDG918x_zbSh_QvZJAPRT-MZYHrZlp_ONYcvGsaLni6H-l5u1B-M"
-                alt="StadiumKing avatar"
-                className="w-6 h-6 rounded-full object-cover border border-[#ff5540]/30"
-              />
-              <span className="text-white font-bold font-mono text-[12px]">
-                @StadiumKing (You)
-              </span>
-            </div>
-            <span className="text-xs font-mono font-bold text-[#00eefc]">
-              1,250 BAR
-            </span>
-          </div>
+          ))}
         </div>
       </section>
     </div>

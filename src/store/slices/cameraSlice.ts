@@ -1,6 +1,7 @@
 import type { StateCreator } from "zustand";
 import type { AppStore, CameraModeType, PermissionState } from "../types";
 import { playSound } from "../utils";
+import { authenticatedFetch } from "@/lib/authenticatedFetch";
 
 let streamRef: MediaStream | null = null;
 let mediaRecorder: MediaRecorder | null = null;
@@ -20,6 +21,10 @@ export interface CameraSlice {
     media: { type: "photo" | "video"; url: string } | null
   ) => void;
   suggestedCheckIn: string;
+  stadiumCheckInToken: string | null;
+  verifiedVenue: string | null;
+  verifiedMatch: string | null;
+  verifiedMinute: string | null;
   setSuggestedCheckIn: (location: string) => void;
   activeCaptureTag: string;
   setActiveCaptureTag: (tag: string) => void;
@@ -68,7 +73,11 @@ export const createCameraSlice: StateCreator<
     capturedMedia: null,
     setCapturedMedia: (capturedMedia) =>
       set({ capturedMedia, curationScore: null }),
-    suggestedCheckIn: "Emirates Stadium (Derby Match)",
+    suggestedCheckIn: "Stadium check-in required",
+    stadiumCheckInToken: null,
+    verifiedVenue: null,
+    verifiedMatch: null,
+    verifiedMinute: null,
     setSuggestedCheckIn: (suggestedCheckIn) => set({ suggestedCheckIn }),
     activeCaptureTag: "Goal",
     setActiveCaptureTag: (activeCaptureTag) => set({ activeCaptureTag }),
@@ -89,19 +98,57 @@ export const createCameraSlice: StateCreator<
       set({ suggestedCheckIn: "Locating..." });
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            set({
-              locationPermission: "granted",
-              suggestedCheckIn: `Check-In (${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)})`,
-            });
+          async (pos) => {
+            try {
+              const response = await authenticatedFetch("/api/stadium-check-in", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  latitude: pos.coords.latitude,
+                  longitude: pos.coords.longitude,
+                  accuracy: pos.coords.accuracy,
+                }),
+              });
+              if (!response.ok) throw new Error("Outside a verified stadium area");
+              const checkin = (await response.json()) as {
+                venueName: string;
+                match: string;
+                minute: string;
+                token: string;
+              };
+              set({
+                locationPermission: "granted",
+                stadiumCheckInToken: checkin.token,
+                verifiedVenue: checkin.venueName,
+                verifiedMatch: checkin.match,
+                verifiedMinute: checkin.minute,
+                suggestedCheckIn: `${checkin.venueName} • Verified`,
+              });
+            } catch {
+              set({
+                locationPermission: "denied",
+                stadiumCheckInToken: null,
+                verifiedVenue: null,
+                verifiedMatch: null,
+                verifiedMinute: null,
+                suggestedCheckIn: "Stadium verification failed",
+              });
+            }
           },
-          (err) => {
-            console.warn("Geolocation error, using fallback", err);
-            set({ locationPermission: "granted", suggestedCheckIn: "Emirates Stadium (Fallback)" });
+          () => {
+            set({
+              locationPermission: "denied",
+              stadiumCheckInToken: null,
+              suggestedCheckIn: "Location verification failed",
+            });
           }
         );
       } else {
-        set({ locationPermission: "granted", suggestedCheckIn: "Emirates Stadium (Fallback)" });
+        set({
+          locationPermission: "denied",
+          stadiumCheckInToken: null,
+          suggestedCheckIn: "Location verification is unavailable",
+        });
       }
     },
 
@@ -158,7 +205,7 @@ export const createCameraSlice: StateCreator<
     },
 
     handleStartRecording: () => {
-      if (!streamRef) return;
+      if (!streamRef || get().locationPermission !== "granted") return;
       playSound("click");
       set({ isRecording: true, recordingSeconds: 0 });
 
@@ -193,6 +240,7 @@ export const createCameraSlice: StateCreator<
     handleStopRecording,
 
     handlePhotoSnap: () => {
+      if (get().locationPermission !== "granted") return;
       const video = get().videoElement;
       if (!video) return;
       playSound("click");

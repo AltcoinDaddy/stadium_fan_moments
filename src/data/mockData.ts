@@ -4,6 +4,7 @@ export interface Moment {
   description: string;
   imageUrl: string;
   videoUrl?: string;
+  mediaType?: 'image' | 'video';
   category: 'GOAL' | 'SAVE' | 'CELEBRATION' | 'CROWD' | 'TENSION';
   rarity: 'CORE' | 'RARE' | 'EPIC' | 'LEGENDARY';
   price: number;
@@ -25,6 +26,7 @@ export interface Moment {
   maxSerial: number;
   timestamp: string;
   txnHash: string;
+  tokenId?: string;
   likes: number;
   views: number;
   isListed: boolean;

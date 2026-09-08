@@ -1,24 +1,196 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/store";
 import { playSound } from "@/store/utils";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
+import { useSendTransaction, useWallets } from "@privy-io/react-auth";
+import { encodeFunctionData, parseEther } from "viem";
+import { chilizPublicClient, chilizSpicy } from "@/lib/chiliz";
+import { matchdayContractAddress, matchdayMomentsAbi } from "@/lib/matchdayContract";
+import { authenticatedFetch } from "@/lib/authenticatedFetch";
 
 export default function DetailScreen() {
   const selectedMoment = useAppStore((s) => s.selectedMoment);
+  const setSelectedMoment = useAppStore((s) => s.setSelectedMoment);
   const setBuySuccess = useAppStore((s) => s.setBuySuccess);
   const userWallet = useAppStore((s) => s.userWallet);
   const isBuying = useAppStore((s) => s.isBuying);
   const buyStatus = useAppStore((s) => s.buyStatus);
   const buySuccess = useAppStore((s) => s.buySuccess);
   const handleBuyNFT = useAppStore((s) => s.handleBuyNFT);
+  const privyUserId = useAppStore((s) => s.privyUserId);
+  const { wallets } = useWallets();
+  const { sendTransaction } = useSendTransaction();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedMomentId = searchParams.get("id");
+  const [isManagingListing, setIsManagingListing] = useState(false);
+  const [listingStatus, setListingStatus] = useState("");
+  const [isLoadingMoment, setIsLoadingMoment] = useState(Boolean(requestedMomentId));
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadMoment = async () => {
+      if (!requestedMomentId) {
+        if (!selectedMoment) router.replace("/marketplace");
+        setIsLoadingMoment(false);
+        return;
+      }
+      if (selectedMoment?.id === requestedMomentId) {
+        setIsLoadingMoment(false);
+        return;
+      }
+
+      setIsLoadingMoment(true);
+      try {
+        const response = await fetch(`/api/moments/${encodeURIComponent(requestedMomentId)}`, {
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error("Moment not found");
+        const data = (await response.json()) as { moment: NonNullable<typeof selectedMoment> };
+        if (!cancelled) setSelectedMoment(data.moment);
+      } catch {
+        if (!cancelled) router.replace("/marketplace");
+      } finally {
+        if (!cancelled) setIsLoadingMoment(false);
+      }
+    };
+
+    void loadMoment();
+    return () => {
+      cancelled = true;
+    };
+  }, [requestedMomentId, router, selectedMoment, setSelectedMoment]);
 
   if (!selectedMoment) {
-    router.push("/marketplace");
-    return null;
+    return isLoadingMoment ? <LoadingOverlay title="Loading Moment" status="Fetching collectible..." /> : null;
   }
+
+  const purchaseOnChain = async () => {
+    if (!selectedMoment.tokenId || !matchdayContractAddress) {
+      throw new Error("This moment was not minted on-chain.");
+    }
+    const wallet =
+      wallets.find((item) => item.walletClientType !== "privy") ||
+      wallets.find((item) => item.walletClientType === "privy");
+    if (!wallet) throw new Error("Connect a wallet to purchase this moment.");
+    await wallet.switchChain(chilizSpicy.id);
+    const { hash } = await sendTransaction(
+      {
+        chainId: chilizSpicy.id,
+        to: matchdayContractAddress,
+        value: parseEther(String(selectedMoment.price)),
+        data: encodeFunctionData({
+          abi: matchdayMomentsAbi,
+          functionName: "purchase",
+          args: [BigInt(selectedMoment.tokenId)],
+        }),
+      },
+      { address: wallet.address }
+    );
+    await chilizPublicClient.waitForTransactionReceipt({ hash });
+    return hash;
+  };
+
+  const getTransactionWallet = () =>
+    wallets.find((item) => item.walletClientType !== "privy") ||
+    wallets.find((item) => item.walletClientType === "privy");
+
+  const updateListing = async (isListed: boolean, price?: number) => {
+    if (!selectedMoment.tokenId || !matchdayContractAddress) {
+      throw new Error("This moment was not minted on-chain.");
+    }
+    const wallet = getTransactionWallet();
+    if (!wallet) throw new Error("Connect a wallet to manage this listing.");
+
+    await wallet.switchChain(chilizSpicy.id);
+    const onChainOwner = await chilizPublicClient.readContract({
+      address: matchdayContractAddress,
+      abi: matchdayMomentsAbi,
+      functionName: "ownerOf",
+      args: [BigInt(selectedMoment.tokenId)],
+    });
+    if (onChainOwner.toLowerCase() !== wallet.address.toLowerCase()) {
+      throw new Error("The connected wallet does not own this on-chain moment.");
+    }
+    setListingStatus(isListed ? "Waiting for listing signature..." : "Waiting for delist signature...");
+    const { hash } = await sendTransaction(
+      {
+        chainId: chilizSpicy.id,
+        to: matchdayContractAddress,
+        data: encodeFunctionData({
+          abi: matchdayMomentsAbi,
+          functionName: isListed ? "listMoment" : "delistMoment",
+          args: isListed
+            ? [BigInt(selectedMoment.tokenId), parseEther(String(price))]
+            : [BigInt(selectedMoment.tokenId)],
+        }),
+      },
+      { address: wallet.address }
+    );
+    await chilizPublicClient.waitForTransactionReceipt({ hash });
+    setListingStatus(isListed ? "Listing confirmed. Updating marketplace..." : "Delist confirmed. Updating marketplace...");
+    return hash;
+  };
+
+  const handleListingAction = async () => {
+    if (!privyUserId) {
+      setListingStatus("Sign in to manage this listing.");
+      return;
+    }
+    const shouldList = !selectedMoment.isListed;
+    let price = selectedMoment.price;
+
+    if (shouldList) {
+      const input = window.prompt("Set resale price in whole CHZ", String(selectedMoment.price));
+      if (input === null) return;
+      price = Number(input);
+      if (!Number.isInteger(price) || price < 1) {
+        window.alert("Enter a whole-number resale price of at least 1 CHZ.");
+        return;
+      }
+    }
+
+    setIsManagingListing(true);
+    try {
+      const txnHash = await updateListing(shouldList, price);
+      const response = await authenticatedFetch(`/api/moments/${selectedMoment.id}/listing`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isListed: shouldList,
+          price,
+          txnHash,
+        }),
+      });
+      if (!response.ok) throw new Error("Listing update could not be saved");
+
+      const data = (await response.json()) as { moment: typeof selectedMoment };
+      useAppStore.getState().setPersistedMoment(data.moment);
+      await Promise.all([
+        useAppStore.getState().hydrateMarketplace(),
+        useAppStore.getState().hydrateUserMoments(`user_${privyUserId}`),
+      ]);
+      playSound("success");
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "The listing transaction was not completed.";
+      setListingStatus(message);
+      window.alert(message);
+    } finally {
+      setIsManagingListing(false);
+    }
+  };
+
+  const isOwner =
+    userWallet.address.startsWith("0x") &&
+    selectedMoment.owner.address.toLowerCase() === userWallet.address.toLowerCase();
+  const canManageListing = isOwner && Boolean(selectedMoment.tokenId);
 
   return (
     <div className="flex flex-col relative animate-fade min-h-full">
@@ -175,8 +347,8 @@ export default function DetailScreen() {
                 Current Owner
               </p>
               <p className="text-sm font-bold text-white">
-                {selectedMoment.owner.username === userWallet.username
-                  ? "You (StadiumKing)"
+                {isOwner
+                  ? "You"
                   : `@${selectedMoment.owner.username}`}
               </p>
             </div>
@@ -227,7 +399,19 @@ export default function DetailScreen() {
           </p>
         </div>
 
-        {selectedMoment.owner.username === userWallet.username ? (
+        {canManageListing ? (
+          <button
+            onClick={() => void handleListingAction()}
+            disabled={isManagingListing}
+            className="bg-green-500/10 border border-green-500/30 rounded-full h-12 px-6 flex items-center justify-center text-green-400 text-xs font-bold uppercase tracking-wider disabled:opacity-50 transition-all"
+          >
+            {isManagingListing
+              ? "Updating Listing..."
+              : selectedMoment.isListed
+              ? "Delist Moment"
+              : "List for Resale"}
+          </button>
+        ) : isOwner ? (
           <div className="bg-green-500/10 border border-green-500/30 rounded-full h-12 px-6 flex items-center justify-center text-green-400 text-xs font-bold uppercase tracking-wider">
             You Own This Moment
           </div>
@@ -237,7 +421,7 @@ export default function DetailScreen() {
           </div>
         ) : (
           <button
-            onClick={() => handleBuyNFT(selectedMoment)}
+            onClick={() => void handleBuyNFT(selectedMoment, purchaseOnChain)}
             disabled={isBuying}
             className="bg-[#ff5540] text-white text-xs font-bold uppercase tracking-widest h-12 px-8 rounded-full box-glow-primary hover:scale-105 active:scale-95 disabled:opacity-50 transition-all font-display"
           >
@@ -247,6 +431,7 @@ export default function DetailScreen() {
       </div>
 
       {isBuying && <LoadingOverlay title="Processing Exchange" status={buyStatus} />}
+      {isManagingListing && <LoadingOverlay title="Managing Listing" status={listingStatus} />}
     </div>
   );
 }

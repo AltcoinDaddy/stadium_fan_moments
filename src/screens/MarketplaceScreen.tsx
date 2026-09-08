@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useAppStore } from "@/store";
 import MomentCard from "@/components/MomentCard";
+import ForYouFeed from "@/components/ForYouFeed";
 
 export default function MarketplaceScreen() {
   const searchQuery = useAppStore((s) => s.searchQuery);
@@ -39,8 +40,8 @@ export default function MarketplaceScreen() {
 
 
   return (
-    <div className="p-4 flex flex-col gap-4 animate-fade">
-      <div className="flex gap-2 w-full">
+    <div className={`flex flex-col animate-fade ${marketTab === "FOR_YOU" ? "flex-1 min-h-0" : "p-4 gap-4"}`}>
+      <div className={`flex gap-2 w-full ${marketTab === "FOR_YOU" ? "p-4 pb-0" : ""}`}>
         <div className="flex-1 bg-[#1d2023] border border-white/10 rounded-full h-11 flex items-center px-4 gap-2.5 focus-within:border-[#00eefc]/50 transition-colors">
           <span className="material-symbols-outlined text-[#c2c7d0] text-lg">
             search
@@ -55,7 +56,7 @@ export default function MarketplaceScreen() {
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 py-1 select-none">
+      <div className={`flex gap-2 overflow-x-auto no-scrollbar py-1 select-none ${marketTab === "FOR_YOU" ? "px-4" : "-mx-4 px-4"}`}>
         {["ALL", "BAR", "PSG", "ACM", "CITY"].map((club) => (
           <button
             key={club}
@@ -71,7 +72,7 @@ export default function MarketplaceScreen() {
         ))}
       </div>
 
-      <div className="flex border-b border-white/10 pb-1 mt-1">
+      <div className={`flex border-b border-white/10 pb-1 mt-1 ${marketTab === "FOR_YOU" ? "px-4" : ""}`}>
         {(["FOR_YOU", "TRENDING", "LIVE"] as const).map((tab) => (
           <button
             key={tab}
@@ -91,6 +92,9 @@ export default function MarketplaceScreen() {
         ))}
       </div>
 
+      {marketTab === "FOR_YOU" ? (
+        <ForYouFeed moments={filteredMoments} />
+      ) : (
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-8">
         {filteredMoments.length > 0 ? (
           filteredMoments.map((moment) => (
@@ -107,6 +111,7 @@ export default function MarketplaceScreen() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

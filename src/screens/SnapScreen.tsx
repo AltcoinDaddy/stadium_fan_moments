@@ -24,22 +24,9 @@ export default function SnapScreen() {
   const handleStopRecording = useAppStore((s) => s.handleStopRecording);
   const handlePhotoSnap = useAppStore((s) => s.handlePhotoSnap);
   const setVideoElement = useAppStore((s) => s.setVideoElement);
-  const setCapturedMedia = useAppStore((s) => s.setCapturedMedia);
   const router = useRouter();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      const type = file.type.startsWith("video/") ? "video" : "photo";
-      setCapturedMedia({ type, url });
-      // Trigger scan via store
-      useAppStore.getState().triggerCurationScan();
-    }
-  };
 
   useEffect(() => {
     if (cameraPermission !== "granted" && cameraPermission !== "denied") {
@@ -186,15 +173,8 @@ export default function SnapScreen() {
         </div>
 
         <div className="flex justify-between items-center w-full mt-1 px-4">
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept="image/*,video/*"
-            onChange={handleFileSelect}
-          />
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => window.alert("Mintable moments must be captured live with the stadium camera.")}
             className="w-12 h-12 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-white overflow-hidden active:scale-95 transition-transform"
           >
             <span className="material-symbols-outlined text-xl">

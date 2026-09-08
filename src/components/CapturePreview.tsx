@@ -2,6 +2,10 @@
 
 import { useAppStore } from "@/store";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
+import { useSendTransaction, useWallets } from "@privy-io/react-auth";
+import { decodeEventLog, encodeFunctionData, parseEther } from "viem";
+import { chilizPublicClient, chilizSpicy } from "@/lib/chiliz";
+import { matchdayContractAddress, matchdayMomentsAbi } from "@/lib/matchdayContract";
 
 export default function CapturePreview() {
   const capturedMedia = useAppStore((s) => s.capturedMedia);
@@ -11,6 +15,8 @@ export default function CapturePreview() {
   const captureRarity = useAppStore((s) => s.captureRarity);
   const captureCaption = useAppStore((s) => s.captureCaption);
   const setCapturedCaption = useAppStore((s) => s.setCapturedCaption);
+  const capturePrice = useAppStore((s) => s.capturePrice);
+  const setCapturePrice = useAppStore((s) => s.setCapturePrice);
   const captureCategory = useAppStore((s) => s.captureCategory);
   const setCaptureCategory = useAppStore((s) => s.setCaptureCategory);
   const cameraMode = useAppStore((s) => s.cameraMode);
@@ -18,6 +24,41 @@ export default function CapturePreview() {
   const isMinting = useAppStore((s) => s.isMinting);
   const mintingStatus = useAppStore((s) => s.mintingStatus);
   const handleMintNFT = useAppStore((s) => s.handleMintNFT);
+  const { wallets } = useWallets();
+  const { sendTransaction } = useSendTransaction();
+
+  const mintOnChain = async ({ metadataUri, price }: { metadataUri: string; price: number }) => {
+    const wallet =
+      wallets.find((item) => item.walletClientType !== "privy") ||
+      wallets.find((item) => item.walletClientType === "privy");
+    if (!wallet || !matchdayContractAddress) throw new Error("Wallet or contract is unavailable");
+    await wallet.switchChain(chilizSpicy.id);
+    const { hash } = await sendTransaction(
+      {
+        chainId: chilizSpicy.id,
+        to: matchdayContractAddress,
+        data: encodeFunctionData({
+          abi: matchdayMomentsAbi,
+          functionName: "mintMoment",
+          args: [metadataUri, parseEther(String(price))],
+        }),
+      },
+      { address: wallet.address }
+    );
+    const receipt = await chilizPublicClient.waitForTransactionReceipt({ hash });
+    const log = receipt.logs
+      .map((item) => {
+        try {
+          return decodeEventLog({ abi: matchdayMomentsAbi, data: item.data, topics: item.topics });
+        } catch {
+          return null;
+        }
+      })
+      .find((item) => item?.eventName === "MomentMinted");
+    const tokenId = log?.args.tokenId;
+    if (tokenId === undefined) throw new Error("Mint event not found");
+    return { hash, tokenId: tokenId.toString() };
+  };
 
   if (!capturedMedia) return null;
 
@@ -95,6 +136,20 @@ export default function CapturePreview() {
           />
         </div>
 
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-bold text-[#c2c7d0] uppercase tracking-widest">
+            Listing Price (CHZ)
+          </label>
+          <input
+            type="number"
+            min="1"
+            step="1"
+            value={capturePrice}
+            onChange={(e) => setCapturePrice(Number(e.target.value))}
+            className="h-11 bg-[#1d2023] border border-white/10 rounded-xl px-4 text-sm text-white focus:border-[#00eefc] outline-none transition-colors"
+          />
+        </div>
+
         <div className="flex flex-col gap-2">
           <label className="text-xs font-bold text-[#c2c7d0] uppercase tracking-widest">
             Collectible Category
@@ -138,7 +193,7 @@ export default function CapturePreview() {
         </div>
 
         <button
-          onClick={handleMintNFT}
+          onClick={() => void handleMintNFT(mintOnChain)}
           disabled={isCurationScanning || isMinting}
           className="h-13 rounded-full bg-[#ff5540] text-white font-bold uppercase tracking-wider shadow-lg shadow-[#ff5540]/20 active:scale-98 disabled:opacity-50 transition-all mt-2"
         >

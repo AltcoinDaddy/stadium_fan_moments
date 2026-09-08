@@ -1,44 +1,50 @@
 import type { StateCreator } from "zustand";
 import type { AppStore } from "../types";
-import { MOCK_USER } from "@/data/mockData";
-import { initAudio } from "../utils";
+
+const defaultUserWallet = {
+  username: "Fan",
+  avatar: "/globe.svg",
+  address: "Not connected",
+  chzBalance: 0,
+  ftBalances: {} as Record<string, number>,
+};
 
 export interface UserSlice {
-  userWallet: typeof MOCK_USER;
-  isWalletGenerating: boolean;
-  walletGenStatus: string;
-  handleSocialLogin: () => void;
+  userWallet: typeof defaultUserWallet;
+  privyUserId: string | null;
+  setAuthenticatedUser: (profile: {
+    privyUserId?: string;
+    username?: string;
+    avatar?: string;
+    address?: string;
+  }) => void;
+  clearAuthenticatedUser: () => void;
+  setChzBalance: (balance: number) => void;
 }
 
 export const createUserSlice: StateCreator<AppStore, [], [], UserSlice> = (
   set
 ) => ({
-  userWallet: MOCK_USER,
-  isWalletGenerating: false,
-  walletGenStatus: "",
+  userWallet: defaultUserWallet,
+  privyUserId: null,
 
-  handleSocialLogin: () => {
-    initAudio();
+  setAuthenticatedUser: (profile) =>
+    set((state) => ({
+      userWallet: {
+        ...state.userWallet,
+        username: profile.username || state.userWallet.username,
+        avatar: profile.avatar || state.userWallet.avatar,
+        address: profile.address || state.userWallet.address,
+      },
+      privyUserId: profile.privyUserId || state.privyUserId,
+    })),
+  clearAuthenticatedUser: () =>
     set({
-      isWalletGenerating: true,
-      walletGenStatus: "Verifying OAuth credentials...",
-    });
-
-    setTimeout(() => {
-      set({ walletGenStatus: "Securing MPC key shares..." });
-      setTimeout(() => {
-        set({
-          walletGenStatus: "Deploying gasless relayer smart contract...",
-        });
-        setTimeout(() => {
-          set({
-            walletGenStatus: "Wallet generated! Address: 0x71C4B...8921df4",
-          });
-          setTimeout(() => {
-            set({ isWalletGenerating: false, navigateTo: "/marketplace" });
-          }, 1000);
-        }, 1200);
-      }, 1000);
-    }, 800);
-  },
+      userWallet: { ...defaultUserWallet, ftBalances: {} },
+      privyUserId: null,
+    }),
+  setChzBalance: (balance) =>
+    set((state) => ({
+      userWallet: { ...state.userWallet, chzBalance: balance },
+    })),
 });

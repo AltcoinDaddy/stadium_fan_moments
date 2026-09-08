@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "MATCHDAY — Stadium Fan Moments",
+  "short_name": "MATCHDAY",
+  "description": "Capture, mint, and trade verified stadium fan moments.",
+  "start_url": "/onboarding",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0B0E11",
+  "theme_color": "#0B0E11",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

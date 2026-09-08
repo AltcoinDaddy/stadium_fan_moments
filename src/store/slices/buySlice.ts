@@ -1,13 +1,14 @@
 import type { StateCreator } from "zustand";
 import type { AppStore, Moment } from "../types";
 import { playSound } from "../utils";
+import { authenticatedFetch } from "@/lib/authenticatedFetch";
 
 export interface BuySlice {
   isBuying: boolean;
   buyStatus: string;
   buySuccess: boolean;
   setBuySuccess: (success: boolean) => void;
-  handleBuyNFT: (moment: Moment) => void;
+  handleBuyNFT: (moment: Moment, purchaseOnChain: (moment: Moment) => Promise<string>) => Promise<void>;
 }
 
 export const createBuySlice: StateCreator<AppStore, [], [], BuySlice> = (
@@ -19,76 +20,38 @@ export const createBuySlice: StateCreator<AppStore, [], [], BuySlice> = (
   buySuccess: false,
   setBuySuccess: (buySuccess) => set({ buySuccess }),
 
-  handleBuyNFT: (moment: Moment) => {
+  handleBuyNFT: async (moment, purchaseOnChain) => {
     set({
       isBuying: true,
-      buyStatus: "Initiating secure Fan Token exchange...",
+      buyStatus: "Waiting for wallet signature...",
     });
 
-    setTimeout(() => {
-      set({
-        buyStatus: `Verifying allowance for ${moment.price} ${moment.tokenSymbol}...`,
+    const state = get();
+    if (!state.privyUserId) {
+      set({ isBuying: false, buyStatus: "Sign in to complete this purchase." });
+      return;
+    }
+
+    try {
+      const txnHash = await purchaseOnChain(moment);
+      set({ buyStatus: "On-chain purchase confirmed. Updating collection..." });
+      const response = await authenticatedFetch(`/api/moments/${moment.id}/purchase`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txnHash }),
       });
-      setTimeout(() => {
-        set({
-          buyStatus:
-            "Securing signature via gasless smart account relayer...",
-        });
-        setTimeout(() => {
-          set({
-            buyStatus:
-              "Broadcasting order settlement to Chiliz mainnet...",
-          });
-          setTimeout(() => {
-            set({
-              buyStatus:
-                "Transferring NFT and routing 10% royalty to creator...",
-            });
-            setTimeout(() => {
-              const state = get();
-              const symbol = moment.tokenSymbol;
-              set((s) => {
-                const balances = { ...s.userWallet.ftBalances };
-                const b = balances as Record<string, number>;
-                if (b[symbol] !== undefined) {
-                  b[symbol] = Math.max(0, b[symbol] - moment.price);
-                }
-                return {
-                  userWallet: { ...s.userWallet, ftBalances: balances },
-                  moments: s.moments.map((m) =>
-                    m.id === moment.id
-                      ? {
-                          ...m,
-                          owner: {
-                            username: state.userWallet.username,
-                            avatar: state.userWallet.avatar,
-                            address: state.userWallet.address,
-                          },
-                          isListed: false,
-                        }
-                      : m
-                  ),
-                  selectedMoment:
-                    state.selectedMoment?.id === moment.id
-                      ? {
-                          ...state.selectedMoment,
-                          owner: {
-                            username: state.userWallet.username,
-                            avatar: state.userWallet.avatar,
-                            address: state.userWallet.address,
-                          },
-                          isListed: false,
-                        }
-                      : state.selectedMoment,
-                  isBuying: false,
-                  buySuccess: true,
-                };
-              });
-              playSound("success");
-            }, 1000);
-          }, 1200);
-        }, 1000);
-      }, 800);
-    }, 800);
+      if (!response.ok) throw new Error("Purchase could not be saved");
+
+      const data = (await response.json()) as { moment: Moment };
+      set({ isBuying: false, buySuccess: true });
+      get().setPersistedMoment(data.moment);
+      await Promise.all([
+        get().hydrateMarketplace(),
+        get().hydrateUserMoments(`user_${state.privyUserId}`),
+      ]);
+      playSound("success");
+    } catch {
+      set({ isBuying: false, buyStatus: "Purchase could not be saved. Please try again." });
+    }
   },
 });

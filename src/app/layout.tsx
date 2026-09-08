@@ -33,6 +33,7 @@ export const viewport: Viewport = {
 };
 
 import PrivyProviderWrapper from "@/providers/PrivyProviderWrapper";
+import PwaRegistration from "@/components/PwaRegistration";
 
 export default function RootLayout({
   children,
@@ -52,7 +53,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#0B0E11" />
       </head>
       <body className="min-h-full overflow-x-hidden bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
-        <PrivyProviderWrapper>{children}</PrivyProviderWrapper>
+        <PrivyProviderWrapper>
+          <PwaRegistration />
+          {children}
+        </PrivyProviderWrapper>
       </body>
     </html>
   );

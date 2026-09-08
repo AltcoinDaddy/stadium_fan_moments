@@ -14,7 +14,7 @@ export default function MomentCard({ moment }: Props) {
 
   const handleClick = () => {
     setSelectedMoment(moment);
-    router.push("/detail");
+    router.push(`/detail?id=${encodeURIComponent(moment.id)}`);
   };
 
   return (

@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fanmoment
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - fanmoment_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fanmoment"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      target: builder
+      args:
+        NEXT_PUBLIC_PRIVY_APP_ID: ${NEXT_PUBLIC_PRIVY_APP_ID}
+        NEXT_PUBLIC_MATCHDAY_CONTRACT_ADDRESS: ${NEXT_PUBLIC_MATCHDAY_CONTRACT_ADDRESS}
+        NEXT_PUBLIC_CHILIZ_CHAIN_ID: ${NEXT_PUBLIC_CHILIZ_CHAIN_ID}
+        NEXT_PUBLIC_CHILIZ_RPC_URL: ${NEXT_PUBLIC_CHILIZ_RPC_URL}
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/fanmoment
+      PRIVY_APP_SECRET: ${PRIVY_APP_SECRET}
+    command: npm run db:migrate
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_PRIVY_APP_ID: ${NEXT_PUBLIC_PRIVY_APP_ID}
+        NEXT_PUBLIC_MATCHDAY_CONTRACT_ADDRESS: ${NEXT_PUBLIC_MATCHDAY_CONTRACT_ADDRESS}
+        NEXT_PUBLIC_CHILIZ_CHAIN_ID: ${NEXT_PUBLIC_CHILIZ_CHAIN_ID}
+        NEXT_PUBLIC_CHILIZ_RPC_URL: ${NEXT_PUBLIC_CHILIZ_RPC_URL}
+    env_file:
+      - .env.local
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/fanmoment
+      PRIVY_APP_SECRET: ${PRIVY_APP_SECRET}
+      NODE_ENV: production
+      PORT: 3000
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    ports:
+      - "${HOST_PORT:-3002}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  fanmoment_postgres:

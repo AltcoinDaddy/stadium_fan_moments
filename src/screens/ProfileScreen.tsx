@@ -1,23 +1,75 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store";
-import { playSound } from "@/store/utils";
+import { authenticatedFetch } from "@/lib/authenticatedFetch";
+import { usePrivy } from "@privy-io/react-auth";
+
+type ProfileStats = {
+  totalIncome: number;
+  momentsSold: number;
+  royaltyIncome: number;
+  incomeSeries: number[];
+};
+
+const emptyStats: ProfileStats = {
+  totalIncome: 0,
+  momentsSold: 0,
+  royaltyIncome: 0,
+  incomeSeries: [],
+};
 
 export default function ProfileScreen() {
   const userWallet = useAppStore((s) => s.userWallet);
   const profileTab = useAppStore((s) => s.profileTab);
   const setProfileTab = useAppStore((s) => s.setProfileTab);
   const myCaptures = useAppStore((s) => s.myCaptures);
-  const moments = useAppStore((s) => s.moments);
+  const collectedMoments = useAppStore((s) => s.collectedMoments);
   const setSelectedMoment = useAppStore((s) => s.setSelectedMoment);
+  const privyUserId = useAppStore((s) => s.privyUserId);
+  const clearAuthenticatedUser = useAppStore((s) => s.clearAuthenticatedUser);
+  const clearUserMoments = useAppStore((s) => s.clearUserMoments);
+  const [stats, setStats] = useState<ProfileStats>(emptyStats);
   const router = useRouter();
+  const { logout } = usePrivy();
 
-  const collectedMoments = moments.filter(
-    (m) =>
-      m.owner.username === userWallet.username &&
-      m.creator.username !== userWallet.username
-  );
+  const handleSignOut = async () => {
+    if (!window.confirm("Sign out of MATCHDAY?")) return;
+    try {
+      await logout();
+    } finally {
+      clearAuthenticatedUser();
+      clearUserMoments();
+      router.replace("/onboarding");
+    }
+  };
+
+  useEffect(() => {
+    if (!privyUserId) {
+      setStats(emptyStats);
+      return;
+    }
+
+    void authenticatedFetch(`/api/users/user_${encodeURIComponent(privyUserId)}/stats`, {
+      cache: "no-store",
+    })
+      .then((response) => (response.ok ? response.json() : emptyStats))
+      .then((data) => setStats({ ...emptyStats, ...data }))
+      .catch(() => setStats(emptyStats));
+  }, [privyUserId]);
+
+  const chartPoints = useMemo(() => {
+    const values = stats.incomeSeries.length ? stats.incomeSeries : [0, 0];
+    const highest = Math.max(...values, 1);
+    return values
+      .map((value, index) => {
+        const x = values.length === 1 ? 50 : (index / (values.length - 1)) * 100;
+        const y = 28 - (value / highest) * 25;
+        return `${x},${y}`;
+      })
+      .join(" ");
+  }, [stats.incomeSeries]);
 
   return (
     <div className="p-4 flex flex-col gap-5 animate-fade">
@@ -32,7 +84,9 @@ export default function ProfileScreen() {
           Owner Hub
         </span>
         <button
-          onClick={() => playSound("click")}
+          onClick={() => void handleSignOut()}
+          aria-label="Sign out"
+          title="Sign out"
           className="w-9 h-9 rounded-full bg-[#1d2023] flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform"
         >
           <span className="material-symbols-outlined text-lg">settings</span>
@@ -74,12 +128,12 @@ export default function ProfileScreen() {
             </p>
             <div className="flex items-baseline gap-1.5 mt-1">
               <h3 className="text-3xl font-display font-black text-[#ffb4a8] leading-none">
-                1,250
+                {stats.totalIncome.toFixed(2)}
               </h3>
-              <span className="text-xs font-bold text-white">BAR</span>
+              <span className="text-xs font-bold text-white">CHZ</span>
             </div>
             <p className="text-[10px] text-[#c2c7d0] font-mono mt-1">
-              &asymp; $4,500.00 USD
+              Confirmed sales and royalty income
             </p>
           </div>
           <div className="bg-[#1d2023] p-2.5 rounded-full border border-white/5 text-[#ff5540]">
@@ -112,15 +166,15 @@ export default function ProfileScreen() {
                 <stop offset="100%" stopColor="#ffb4a8" stopOpacity="0" />
               </linearGradient>
             </defs>
-            <path
-              d="M0,25 Q10,18 20,20 T40,12 T60,15 T80,5 T100,2"
+            <polyline
+              points={chartPoints}
               fill="none"
               stroke="url(#chartGrad)"
               strokeWidth="2.5"
               strokeLinecap="round"
             />
-            <path
-              d="M0,25 Q10,18 20,20 T40,12 T60,15 T80,5 T100,2 L100,30 L0,30 Z"
+            <polygon
+              points={`${chartPoints} 100,30 0,30`}
               fill="url(#fillGrad)"
             />
           </svg>
@@ -132,7 +186,7 @@ export default function ProfileScreen() {
               Moments Sold
             </p>
             <p className="text-base font-extrabold text-white font-mono mt-0.5">
-              42
+              {stats.momentsSold}
             </p>
           </div>
           <div>
@@ -140,7 +194,7 @@ export default function ProfileScreen() {
               Royalty Income
             </p>
             <p className="text-base font-extrabold text-[#00eefc] font-mono mt-0.5">
-              150 BAR
+              {stats.royaltyIncome.toFixed(2)} CHZ
             </p>
           </div>
         </div>
@@ -183,7 +237,7 @@ export default function ProfileScreen() {
                 key={moment.id}
                 onClick={() => {
                   setSelectedMoment(moment);
-                  router.push("/detail");
+                  router.push(`/detail?id=${encodeURIComponent(moment.id)}`);
                 }}
                 className="relative aspect-[3/4] rounded-2xl overflow-hidden group cursor-pointer border border-white/5 bg-[#161B22] flex flex-col justify-end"
               >
@@ -231,7 +285,7 @@ export default function ProfileScreen() {
                   key={moment.id}
                   onClick={() => {
                     setSelectedMoment(moment);
-                    router.push("/detail");
+                    router.push(`/detail?id=${encodeURIComponent(moment.id)}`);
                   }}
                   className="relative aspect-[3/4] rounded-2xl overflow-hidden group cursor-pointer border border-white/5 bg-[#161B22] flex flex-col justify-end"
                 >

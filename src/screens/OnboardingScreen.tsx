@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store";
 import { usePrivy } from "@privy-io/react-auth";
@@ -14,12 +14,7 @@ export default function OnboardingScreen() {
   const cameraPermission = useAppStore((s) => s.cameraPermission);
   const locationPermission = useAppStore((s) => s.locationPermission);
   const router = useRouter();
-
-  useEffect(() => {
-    if (ready && authenticated) {
-      setStep(1);
-    }
-  }, [ready, authenticated]);
+  const currentStep = ready && authenticated ? 1 : step;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0B0E11] text-[#e1e2e7] font-body overflow-x-hidden relative items-center justify-center py-12 px-4">
@@ -36,7 +31,7 @@ export default function OnboardingScreen() {
             </span>
           </div>
 
-          {step === 0 && (
+          {currentStep === 0 && (
             <div className="flex-grow flex flex-col justify-between py-6">
               <div className="relative w-full aspect-square flex items-center justify-center mt-2">
                 <div className="absolute w-[80%] h-[80%] bg-[#ff5540]/10 rounded-full blur-2xl animate-pulse"></div>
@@ -65,15 +60,30 @@ export default function OnboardingScreen() {
 
               <div className="flex flex-col gap-3 mt-4 relative z-20">
                 <p className="text-xs text-[#c2c7d0] text-center uppercase tracking-widest font-semibold mb-1">
-                  Create Embedded Wallet
+                  Choose how to continue
                 </p>
 
                 <button
-                  onClick={() => login()}
+                  onClick={() => login({ loginMethods: ["email"] })}
                   className="w-full h-13 rounded-full bg-white hover:bg-zinc-200 text-black flex items-center justify-center gap-3 font-semibold transition-transform active:scale-98 shadow-md cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-lg">mail</span>
                   <span>Sign in with Email</span>
+                </button>
+
+                <button
+                  onClick={() =>
+                    login({
+                      loginMethods: ["wallet"],
+                      walletChainType: "ethereum-only",
+                    })
+                  }
+                  className="w-full h-13 rounded-full bg-[#1d2023] hover:bg-[#252a2e] text-white border border-white/10 flex items-center justify-center gap-3 font-semibold transition-transform active:scale-98 shadow-md cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-lg">
+                    account_balance_wallet
+                  </span>
+                  <span>Connect Existing Wallet</span>
                 </button>
 
                 <div className="flex justify-between items-center px-4 mt-2">
@@ -91,7 +101,7 @@ export default function OnboardingScreen() {
             </div>
           )}
 
-          {step === 1 && (
+          {currentStep === 1 && (
             <div className="flex-grow flex flex-col justify-between py-6 transition-all fade-in">
               <div className="flex flex-col items-center text-center mt-6">
                 <div className="w-16 h-16 rounded-full bg-[#00eefc]/10 border border-[#00eefc]/30 flex items-center justify-center text-[#00eefc] shadow-[0_0_20px_rgba(0,238,252,0.15)] mb-6 animate-pulse">
@@ -151,13 +161,13 @@ export default function OnboardingScreen() {
             <button
               onClick={() => setStep(0)}
               className={`w-2 h-2 rounded-full transition-colors ${
-                step === 0 ? "bg-[#ff5540]" : "bg-white/20"
+                currentStep === 0 ? "bg-[#ff5540]" : "bg-white/20"
               }`}
             />
             <button
               onClick={() => setStep(1)}
               className={`w-2 h-2 rounded-full transition-colors ${
-                step === 1 ? "bg-[#ff5540]" : "bg-white/20"
+                currentStep === 1 ? "bg-[#ff5540]" : "bg-white/20"
               }`}
             />
           </div>
