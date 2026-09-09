@@ -24,9 +24,9 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   return (
-    <html lang="en" className="h-full overflow-x-hidden antialiased">
+    <html lang="en" className="h-full overflow-x-hidden antialiased" suppressHydrationWarning>
       <head><HeadContent /></head>
-      <body className="min-h-full overflow-x-hidden bg-background font-sans text-ink selection:bg-lime selection:text-ink">
+      <body className="min-h-full overflow-x-hidden bg-background font-sans text-ink selection:bg-lime selection:text-ink" suppressHydrationWarning>
         <PrivyProviderWrapper>
           <MobileOnlyGuard>
             <PwaRegistration />

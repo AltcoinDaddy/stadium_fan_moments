@@ -263,10 +263,8 @@ api.post("/stadium-check-in", async (c) => {
     return c.json({ error: "A high-accuracy device location is required" }, 422);
   }
   // Local desktop previews do not reliably expose a hardware location source.
-  // Keep this escape hatch server-only and unavailable in production.
-  const localPreview =
-    process.env.NODE_ENV !== "production" &&
-    c.req.header("x-fanmoments-preview-checkin") === "1";
+  // Bypass the strict stadium geo-fence check entirely in development mode.
+  const localPreview = process.env.NODE_ENV !== "production";
   const checkin = localPreview
     ? { stadium: stadiums[0], distance: 0 }
     : findStadiumCheckin(latitude!, longitude!);

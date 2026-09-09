@@ -11,6 +11,7 @@ export default function SnapScreen() {
   const recordingSeconds = useAppStore((s) => s.recordingSeconds);
   const isFlashOn = useAppStore((s) => s.isFlashOn);
   const setIsFlashOn = useAppStore((s) => s.setIsFlashOn);
+  const cameraFacingMode = useAppStore((s) => s.cameraFacingMode);
   const cameraMode = useAppStore((s) => s.cameraMode);
   const setCameraMode = useAppStore((s) => s.setCameraMode);
   const activeCaptureTag = useAppStore((s) => s.activeCaptureTag);
@@ -45,27 +46,29 @@ export default function SnapScreen() {
   }, [cameraPermission, setVideoElement]);
 
   return (
-    <div className="relative flex h-full min-h-[100dvh] flex-1 flex-col overflow-hidden bg-ink">
-      <div className="absolute inset-0 z-0 bg-ink">
+    <div className="relative flex h-full min-h-[100dvh] flex-1 flex-col overflow-hidden bg-[#08080f]">
+      <div className="absolute inset-0 z-0 bg-[#08080f]">
         {cameraPermission === "granted" ? (
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="h-full w-full object-cover"
+            className={`absolute inset-0 h-full w-full object-cover brightness-110 contrast-110 saturate-[1.15] transition-transform duration-300 ${
+              cameraFacingMode === "user" ? "scale-x-[-1]" : ""
+            }`}
           />
         ) : (
           <img
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp67mGs7ImnLNJD0V0Ci05zU2cTmKt2NfS7-7udAD1i5tO3WjJ-mWTDNbsvMKXWCpoFUUw0F6_aLSiAbub-95mqjr8lzJJXsofsEprLtF3_zibHLYJJ8Z2yZrOk3rAXMF7-b672eJkEtXVtoFIPFXYJ_1FMR5n_Z4aO2q_QpDqbz_nRC-3VM6iPK7j6N5qIbHEdzOVFbGo9PuB2_Ud2xsmM4Pkq2bGp43XOQhxqMQxqBw2cws8XoDL30LfwlSfor33gxLLhszE190"
             alt="Simulated stadium camera viewfinder background"
-            className="h-full w-full object-cover opacity-80"
+            className="absolute inset-0 h-full w-full object-cover opacity-80"
           />
         )}
         {isRecording && (
           <div className="scanline pointer-events-none absolute inset-0 z-10"></div>
         )}
-        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-ink/70 via-transparent to-ink/80"></div>
+        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/40 via-transparent via-20% to-black/60"></div>
       </div>
 
       <header className="relative z-20 flex w-full flex-col gap-4 px-4 pt-4">

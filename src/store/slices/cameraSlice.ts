@@ -10,6 +10,7 @@ let recordedChunks: Blob[] = [];
 export interface CameraSlice {
   cameraPermission: PermissionState;
   locationPermission: PermissionState;
+  cameraFacingMode: "user" | "environment";
   cameraMode: CameraModeType;
   setCameraMode: (mode: CameraModeType) => void;
   isRecording: boolean;
@@ -65,6 +66,7 @@ export const createCameraSlice: StateCreator<
   return {
     cameraPermission: "prompt",
     locationPermission: "prompt",
+    cameraFacingMode: "environment",
 
     cameraMode: "video",
     setCameraMode: (cameraMode) => set({ cameraMode }),
@@ -179,6 +181,12 @@ export const createCameraSlice: StateCreator<
       // the authoritative check and may still display the native prompt.
       const getPosition = (options: PositionOptions) =>
         new Promise<GeolocationPosition>((resolve, reject) => {
+          if (import.meta.env.DEV) {
+            return resolve({
+              coords: { latitude: 0, longitude: 0, accuracy: 10, altitude: null, altitudeAccuracy: null, heading: null, speed: null },
+              timestamp: Date.now(),
+            } as GeolocationPosition);
+          }
           navigator.geolocation.getCurrentPosition(resolve, reject, options);
         });
 
@@ -327,22 +335,33 @@ export const createCameraSlice: StateCreator<
           streamRef.getTracks().forEach((track) => track.stop());
         }
         
-        // Try requesting with facingMode, fallback to generic video if fails (desktop)
+        // Try requesting with facingMode and 4K resolution, fallback to generic 4K video if fails
         let stream;
         try {
           stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: currentMode },
+            video: { 
+              facingMode: currentMode,
+              width: { ideal: 3840 },
+              height: { ideal: 2160 },
+              frameRate: { ideal: 60, min: 30 },
+              resizeMode: "none"
+            } as any,
             audio: false, // Audio request causes significant delays on mobile
           });
         } catch {
           stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
+            video: { 
+              width: { ideal: 3840 },
+              height: { ideal: 2160 },
+              frameRate: { ideal: 60, min: 30 },
+              resizeMode: "none"
+            } as any,
             audio: false,
           });
         }
         
         streamRef = stream;
-        set({ cameraPermission: "granted" });
+        set({ cameraPermission: "granted", cameraFacingMode: currentMode as "user" | "environment" });
         const el = get().videoElement;
         if (el) {
           if (el.srcObject !== stream) {

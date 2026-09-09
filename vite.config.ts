@@ -7,7 +7,7 @@ import { nitro } from "nitro/vite";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
-  server: { port: 3000 },
+  server: { port: 3000, allowedHosts: true },
   optimizeDeps: { force: true },
   define: {
     "import.meta.env.VITE_PRIVY_APP_ID": JSON.stringify(env.NEXT_PUBLIC_PRIVY_APP_ID || ""),
