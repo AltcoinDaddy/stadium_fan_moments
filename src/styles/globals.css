@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: Nunito;
+  src: url("../fonts/Nunito.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Nunito;
+  src: url("../fonts/Nunito-Italic.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@theme {
+  --color-background: #08080f;
+  --color-surface: #15151d;
+  --color-ink: #f8f8fb;
+  --color-muted: #9696a5;
+  --color-line: #292936;
+  --color-lime: #baff27;
+  --color-mint: #caff39;
+  --color-peach: #5c4cf2;
+  --color-lavender: #4740d9;
+  --color-sky: #3155d8;
+  --color-blush: #ec4fc4;
+
+  --color-on-surface: #f8f8fb;
+  --color-on-surface-variant: #9696a5;
+  --color-primary-brand: #baff27;
+  --color-primary: #baff27;
+  --color-secondary-brand: #15151d;
+  --color-secondary: #15151d;
+  --color-tertiary: #9696a5;
+  --color-surface-container: #12121a;
+  --color-surface-container-low: #0e0e15;
+  --color-surface-container-high: #1b1b25;
+  --color-surface-container-highest: #252532;
+}
+
+@theme inline {
+  --font-sans: "Nunito", ui-rounded, ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Nunito", ui-rounded, ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Nunito", ui-rounded, ui-sans-serif, system-ui, sans-serif;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.recording-pulse {
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+html,
+body {
+  background-color: #08080f;
+  color: #f8f8fb;
+  font-family: "Nunito", ui-rounded, ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+.scanline {
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0),
+    rgba(201, 240, 61, 0.2) 50%,
+    rgba(255,255,255,0)
+  );
+  animation: scan 4s linear infinite;
+}
+
+@keyframes scan {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100dvh); }
+}

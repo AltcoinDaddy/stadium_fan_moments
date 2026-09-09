@@ -1,7 +1,7 @@
 import type { StateCreator } from "zustand";
 import type { AppStore, CameraModeType, PermissionState } from "../types";
+import { authenticatedFetch } from "../../lib/authenticatedFetch";
 import { playSound } from "../utils";
-import { authenticatedFetch } from "@/lib/authenticatedFetch";
 
 let streamRef: MediaStream | null = null;
 let mediaRecorder: MediaRecorder | null = null;
@@ -31,6 +31,8 @@ export interface CameraSlice {
   videoElement: HTMLVideoElement | null;
   setVideoElement: (el: HTMLVideoElement | null) => void;
   requestLocation: () => void;
+  requestPreviewCheckIn: () => Promise<void>;
+  watchLocationPermission: () => () => void;
   requestCamera: () => Promise<void>;
   requestCameraStop: () => void;
   handleStartRecording: () => void;
@@ -69,7 +71,16 @@ export const createCameraSlice: StateCreator<
     isRecording: false,
     recordingSeconds: 0,
     isFlashOn: false,
-    setIsFlashOn: (isFlashOn) => set({ isFlashOn }),
+    setIsFlashOn: (isFlashOn) => {
+      set({ isFlashOn });
+      const track = streamRef?.getVideoTracks()[0];
+      if (!track || typeof track.applyConstraints !== "function") return;
+      void track.applyConstraints({
+        advanced: [{ torch: isFlashOn } as MediaTrackConstraintSet],
+      }).catch(() => {
+        // Keep the toggle usable on cameras that do not expose torch control.
+      });
+    },
     capturedMedia: null,
     setCapturedMedia: (capturedMedia) =>
       set({ capturedMedia, curationScore: null }),
@@ -94,60 +105,204 @@ export const createCameraSlice: StateCreator<
       }
     },
 
-    requestLocation: () => {
+    watchLocationPermission: () => {
+      if (typeof navigator === "undefined" || !navigator.permissions) {
+        return () => undefined;
+      }
+
+      let stopped = false;
+      let permissionStatus: PermissionStatus | null = null;
+
+      const syncPermission = () => {
+        if (stopped || !permissionStatus) return;
+
+        if (permissionStatus.state === "denied") {
+          set({
+            locationPermission: "denied",
+            stadiumCheckInToken: null,
+            verifiedVenue: null,
+            verifiedMatch: null,
+            verifiedMinute: null,
+            suggestedCheckIn:
+              "Location is blocked in browser settings. Allow it, then retry.",
+          });
+          return;
+        }
+
+        // A granted browser permission only means the browser may share a
+        // location. The stadium API still needs a fresh position before a
+        // capture is allowed, so do not treat this as a completed check-in.
+        if (permissionStatus.state === "prompt" && get().locationPermission === "granted") {
+          set({
+            locationPermission: "prompt",
+            stadiumCheckInToken: null,
+            verifiedVenue: null,
+            verifiedMatch: null,
+            verifiedMinute: null,
+            suggestedCheckIn: "Stadium check-in required",
+          });
+        }
+      };
+
+      void navigator.permissions
+        .query({ name: "geolocation" })
+        .then((status) => {
+          if (stopped) return;
+          permissionStatus = status;
+          syncPermission();
+          status.addEventListener("change", syncPermission);
+        })
+        .catch(() => {
+          // Older browsers can still use getCurrentPosition when the user taps Grant.
+        });
+
+      return () => {
+        stopped = true;
+        permissionStatus?.removeEventListener("change", syncPermission);
+      };
+    },
+
+    requestLocation: async () => {
       set({ suggestedCheckIn: "Locating..." });
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (pos) => {
-            try {
-              const response = await authenticatedFetch("/api/stadium-check-in", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  latitude: pos.coords.latitude,
-                  longitude: pos.coords.longitude,
-                  accuracy: pos.coords.accuracy,
-                }),
-              });
-              if (!response.ok) throw new Error("Outside a verified stadium area");
-              const checkin = (await response.json()) as {
-                venueName: string;
-                match: string;
-                minute: string;
-                token: string;
-              };
-              set({
-                locationPermission: "granted",
-                stadiumCheckInToken: checkin.token,
-                verifiedVenue: checkin.venueName,
-                verifiedMatch: checkin.match,
-                verifiedMinute: checkin.minute,
-                suggestedCheckIn: `${checkin.venueName} • Verified`,
-              });
-            } catch {
-              set({
-                locationPermission: "denied",
-                stadiumCheckInToken: null,
-                verifiedVenue: null,
-                verifiedMatch: null,
-                verifiedMinute: null,
-                suggestedCheckIn: "Stadium verification failed",
-              });
-            }
-          },
-          () => {
-            set({
-              locationPermission: "denied",
-              stadiumCheckInToken: null,
-              suggestedCheckIn: "Location verification failed",
-            });
-          }
-        );
-      } else {
+      if (typeof navigator === "undefined" || !navigator.geolocation) {
         set({
           locationPermission: "denied",
           stadiumCheckInToken: null,
           suggestedCheckIn: "Location verification is unavailable",
+        });
+        return;
+      }
+
+      // Do not use Permissions API state as a hard gate here. Embedded WebKit
+      // browsers can report a stale "denied" value even after the host app is
+      // enabled in system settings; a user-triggered geolocation request is
+      // the authoritative check and may still display the native prompt.
+      const getPosition = (options: PositionOptions) =>
+        new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, options);
+        });
+
+      const verifyPosition = async (position: GeolocationPosition) => {
+        const response = await authenticatedFetch("/api/stadium-check-in", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+          }),
+        });
+        if (!response.ok) {
+          const error = (await response.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(error?.error || "Stadium verification failed");
+        }
+        const checkin = (await response.json()) as {
+          venueName: string;
+          match: string;
+          minute: string;
+          token: string;
+        };
+        set({
+          locationPermission: "granted",
+          stadiumCheckInToken: checkin.token,
+          verifiedVenue: checkin.venueName,
+          verifiedMatch: checkin.match,
+          verifiedMinute: checkin.minute,
+          suggestedCheckIn: `${checkin.venueName} • Verified`,
+        });
+      };
+
+      try {
+        const position = await getPosition({
+          enableHighAccuracy: true,
+          timeout: 15_000,
+          maximumAge: 0,
+        });
+        await verifyPosition(position);
+      } catch (error) {
+        // Safari can time out while CoreLocation is warming up, just as iOS
+        // can report kCLErrorLocationUnknown. Retry both transient failures
+        // with a less demanding reading and allow a recent cached position.
+        if (
+          typeof error === "object" &&
+          error !== null &&
+          "code" in error &&
+          (error.code === GeolocationPositionError.POSITION_UNAVAILABLE ||
+            error.code === GeolocationPositionError.TIMEOUT)
+        ) {
+          set({ suggestedCheckIn: "Finding a location signal..." });
+          try {
+            const position = await getPosition({
+              enableHighAccuracy: false,
+              timeout: 20_000,
+              maximumAge: 60_000,
+            });
+            await verifyPosition(position);
+            return;
+          } catch (retryError) {
+            error = retryError;
+          }
+        }
+
+        const code =
+          typeof error === "object" && error !== null && "code" in error
+            ? error.code
+            : undefined;
+        const message =
+          code === GeolocationPositionError.PERMISSION_DENIED
+            ? "Location permission was denied"
+            : code === GeolocationPositionError.TIMEOUT
+            ? "Location request timed out"
+            : error instanceof Error
+            ? error.message
+            : "Location signal is unavailable. Move outdoors and retry.";
+        set({
+          locationPermission: "denied",
+          stadiumCheckInToken: null,
+          verifiedVenue: null,
+          verifiedMatch: null,
+          verifiedMinute: null,
+          suggestedCheckIn: message,
+        });
+      }
+    },
+
+    requestPreviewCheckIn: async () => {
+      if (!import.meta.env.DEV) return;
+      set({ suggestedCheckIn: "Preparing local camera preview..." });
+      try {
+        const response = await authenticatedFetch("/api/stadium-check-in", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-fanmoments-preview-checkin": "1",
+          },
+          body: JSON.stringify({ latitude: 0, longitude: 0, accuracy: 10 }),
+        });
+        if (!response.ok) {
+          const error = (await response.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(error?.error || "Local preview check-in failed");
+        }
+        const checkin = (await response.json()) as {
+          venueName: string;
+          match: string;
+          minute: string;
+          token: string;
+        };
+        set({
+          locationPermission: "granted",
+          stadiumCheckInToken: checkin.token,
+          verifiedVenue: checkin.venueName,
+          verifiedMatch: checkin.match,
+          verifiedMinute: checkin.minute,
+          suggestedCheckIn: "Local preview verified",
+        });
+      } catch (error) {
+        set({
+          locationPermission: "denied",
+          stadiumCheckInToken: null,
+          suggestedCheckIn:
+            error instanceof Error ? error.message : "Local preview check-in failed",
         });
       }
     },
@@ -179,7 +334,7 @@ export const createCameraSlice: StateCreator<
             video: { facingMode: currentMode },
             audio: false, // Audio request causes significant delays on mobile
           });
-        } catch (e) {
+        } catch {
           stream = await navigator.mediaDevices.getUserMedia({
             video: true,
             audio: false,
@@ -210,12 +365,22 @@ export const createCameraSlice: StateCreator<
       set({ isRecording: true, recordingSeconds: 0 });
 
       recordedChunks = [];
-      mediaRecorder = new MediaRecorder(streamRef);
+      const mimeType = [
+        "video/webm;codecs=vp9",
+        "video/webm;codecs=vp8",
+        "video/webm",
+        "video/mp4",
+      ].find((type) => MediaRecorder.isTypeSupported(type));
+      mediaRecorder = mimeType
+        ? new MediaRecorder(streamRef, { mimeType })
+        : new MediaRecorder(streamRef);
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) recordedChunks.push(e.data);
       };
       mediaRecorder.onstop = () => {
-        const blob = new Blob(recordedChunks, { type: "video/webm" });
+        const blob = new Blob(recordedChunks, {
+          type: mediaRecorder?.mimeType || mimeType || "video/webm",
+        });
         const url = URL.createObjectURL(blob);
         set({
           capturedMedia: { type: "video", url },

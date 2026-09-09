@@ -7,7 +7,7 @@ import { moments, stadiumCheckins, users } from "./db/schema";
 import { authConfigurationError, requirePrivyUserId } from "./auth";
 import { chilizSpicy } from "@/lib/chiliz";
 import { matchdayContractAddress, matchdayMomentsAbi } from "@/lib/matchdayContract";
-import { createCheckinToken, findStadiumCheckin, getVenueMatch, verifyCheckinToken } from "./stadium";
+import { createCheckinToken, findStadiumCheckin, getVenueMatch, stadiums, verifyCheckinToken } from "./stadium";
 
 const api = new Hono().basePath("/api");
 const ownerUsers = alias(users, "moment_owner");
@@ -262,7 +262,14 @@ api.post("/stadium-check-in", async (c) => {
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isFinite(accuracy) || accuracy! > 100) {
     return c.json({ error: "A high-accuracy device location is required" }, 422);
   }
-  const checkin = findStadiumCheckin(latitude!, longitude!);
+  // Local desktop previews do not reliably expose a hardware location source.
+  // Keep this escape hatch server-only and unavailable in production.
+  const localPreview =
+    process.env.NODE_ENV !== "production" &&
+    c.req.header("x-fanmoments-preview-checkin") === "1";
+  const checkin = localPreview
+    ? { stadium: stadiums[0], distance: 0 }
+    : findStadiumCheckin(latitude!, longitude!);
   if (!checkin) return c.json({ error: "You are outside a supported stadium check-in zone" }, 403);
 
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);

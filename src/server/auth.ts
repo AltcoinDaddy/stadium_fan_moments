@@ -1,30 +1,14 @@
-import { PrivyClient } from "@privy-io/node";
 import type { Context } from "hono";
+import { PrivyClient } from "@privy-io/node";
 
-let privyClient: PrivyClient | undefined;
-
-function getPrivyClient() {
-  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
-  const appSecret = process.env.PRIVY_APP_SECRET;
-  if (!appId || !appSecret) {
-    throw new Error("Privy server authentication is not configured");
-  }
-  if (!privyClient) privyClient = new PrivyClient({ appId, appSecret });
-  return privyClient;
-}
-
+let client: PrivyClient | undefined;
 export async function requirePrivyUserId(c: Context) {
-  const authorization = c.req.header("Authorization");
-  const accessToken = authorization?.startsWith("Bearer ")
-    ? authorization.slice("Bearer ".length)
-    : undefined;
-  if (!accessToken) return null;
-
+  const token = c.req.header("Authorization")?.replace(/^Bearer\s+/, "");
+  if (!token || !process.env.NEXT_PUBLIC_PRIVY_APP_ID || !process.env.PRIVY_APP_SECRET) return null;
   try {
-    return (await getPrivyClient().utils().auth().verifyAccessToken(accessToken)).user_id;
-  } catch {
-    return null;
-  }
+    client ??= new PrivyClient({ appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID, appSecret: process.env.PRIVY_APP_SECRET });
+    return (await client.utils().auth().verifyAccessToken(token)).user_id;
+  } catch { return null; }
 }
 
 export function authConfigurationError() {

@@ -1,181 +1,132 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "@/lib/router-compat";
 import { useAppStore } from "@/store";
-import type { Match } from "@/data/mockData";
-import MatchCard from "@/components/MatchCard";
+import { MOCK_MATCHES, type Match } from "@/data/mockData";
 
-export default function TrendingScreen() {
-  const moments = useAppStore((s) => s.moments);
-  const setSelectedMoment = useAppStore((s) => s.setSelectedMoment);
+const VENUE_IMAGE = "/marketplace-stadium-hero.png";
+
+type Venue = {
+  id: string;
+  name: string;
+  location: string;
+  distance: string;
+  match: Match;
+};
+
+function VenueCard({ venue, compact, onOpen }: { venue: Venue; compact?: boolean; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className={`${compact ? "w-[72%]" : "w-full"} shrink-0 overflow-hidden rounded-[22px] border border-white/10 bg-[#191920] text-left shadow-[0_14px_28px_rgba(0,0,0,0.24)] active:scale-[0.98]`}
+    >
+      <div className={`${compact ? "h-28" : "h-44"} relative overflow-hidden bg-[#223a9a]`}>
+        <img src={VENUE_IMAGE} alt="" className="h-full w-full object-cover object-[52%_69%]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#16161d] via-transparent to-transparent" />
+      </div>
+      <div className="p-3.5">
+        <p className="truncate text-[15px] font-extrabold text-white">{venue.name}</p>
+        <p className="mt-1 truncate text-[12px] font-medium text-white/45">{venue.location}</p>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-[12px] font-bold text-lime">{venue.distance}</span>
+          <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/70">{venue.match.status === "LIVE" ? "LIVE" : venue.match.time}</span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+export default function TrendingScreen({ initialMatches = [] }: { initialMatches?: Match[] }) {
+  const searchQuery = useAppStore((s) => s.searchQuery);
+  const setSearchQuery = useAppStore((s) => s.setSearchQuery);
+  const setSuggestedCheckIn = useAppStore((s) => s.setSuggestedCheckIn);
   const router = useRouter();
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [leaderboard, setLeaderboard] = useState<Array<{ username: string; avatar: string; captures: number }>>([]);
+  const [matches, setMatches] = useState<Match[]>(initialMatches);
+  const [liveOnly, setLiveOnly] = useState(false);
 
   useEffect(() => {
-    void fetch("/api/sports/matches").then((response) => response.ok ? response.json() : { matches: [] }).then((data) => setMatches(data.matches || [])).catch(() => setMatches([]));
-    void fetch("/api/leaderboard").then((response) => response.ok ? response.json() : { leaderboard: [] }).then((data) => setLeaderboard(data.leaderboard || [])).catch(() => setLeaderboard([]));
-  }, []);
+    void fetch("/api/sports/matches")
+      .then((response) => (response.ok ? response.json() : { matches: [] }))
+      .then((data) => setMatches(data.matches?.length ? data.matches : (initialMatches.length ? initialMatches : MOCK_MATCHES)))
+      .catch(() => setMatches(MOCK_MATCHES));
+  }, [initialMatches]);
+
+  const venues = useMemo<Venue[]>(() => {
+    const source = matches.length ? matches : MOCK_MATCHES;
+    return source.map((match, index) => ({
+      id: match.id,
+      name: match.location,
+      location: `${match.teamHome} vs ${match.teamAway}`,
+      distance: index === 0 ? "1.2 km away" : `${index + 2}.4 km away`,
+      match,
+    }));
+  }, [matches]);
+
+  const filteredVenues = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return venues.filter((venue) => {
+      const matchesSearch = !query || `${venue.name} ${venue.location}`.toLowerCase().includes(query);
+      return matchesSearch && (!liveOnly || venue.match.status === "LIVE");
+    });
+  }, [liveOnly, searchQuery, venues]);
+
+  const openVenue = (venue: Venue) => {
+    setSuggestedCheckIn(`${venue.name} (${venue.match.teamHomeSymbol} vs ${venue.match.teamAwaySymbol})`);
+    router.push("/snap");
+  };
 
   return (
-    <div className="p-4 flex flex-col gap-5 animate-fade">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-1 text-[#ff5540]">
-          <span
-            className="material-symbols-outlined text-xl"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            local_fire_department
-          </span>
-          <h2 className="text-lg font-display font-extrabold uppercase tracking-wide">
-            WHAT&apos;S HOT
-          </h2>
+    <div className="min-h-full bg-[#08080f] px-5 pb-7 pt-5 text-white">
+      <header className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button type="button" aria-label="Back to home" onClick={() => router.push("/marketplace")} className="flex h-10 w-8 items-center justify-center text-white active:scale-95">
+            <span className="material-symbols-outlined text-[26px]">arrow_back</span>
+          </button>
+          <h1 className="text-[25px] font-extrabold tracking-[-0.04em]">Explore</h1>
         </div>
-        <p className="text-xs text-[#c2c7d0]">
-          Real-time stadium activity and spiking moments.
-        </p>
+        <button type="button" onClick={() => setLiveOnly((active) => !active)} className={`flex h-10 items-center gap-1.5 rounded-full px-3 text-[12px] font-bold ${liveOnly ? "bg-lime text-[#08080f]" : "bg-white/10 text-lime"}`}>
+          <span className="material-symbols-outlined text-[17px]">location_on</span>
+          Nearby
+        </button>
+      </header>
+
+      <div className="mt-5 flex h-14 items-center gap-3 rounded-[18px] bg-[#1d1d22] px-4">
+        <span className="material-symbols-outlined text-[24px] text-white/60">search</span>
+        <input
+          type="search"
+          aria-label="Search venues or clubs"
+          placeholder="Search venue or club"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold text-white outline-none placeholder:text-white/40"
+        />
+        <button type="button" onClick={() => setLiveOnly((active) => !active)} className={`rounded-full px-3 py-2 text-[11px] font-extrabold ${liveOnly ? "bg-lime text-[#08080f]" : "bg-white text-[#121218]"}`}>
+          Venues
+        </button>
       </div>
 
-      <section className="flex flex-col gap-3">
+      <section className="mt-8">
+        <h2 className="text-[19px] font-extrabold tracking-[-0.03em]">Featured venues</h2>
+        <div className="-mx-5 mt-4 flex gap-3 overflow-x-auto px-5 pb-1 no-scrollbar">
+          {venues.slice(0, 2).map((venue) => <VenueCard key={venue.id} venue={venue} compact onOpen={() => openVenue(venue)} />)}
+        </div>
+      </section>
+
+      <section className="mt-8">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold text-[#c2c7d0] uppercase tracking-widest">
-            Live Hot Matches
-          </h3>
-          <span className="w-2 h-2 rounded-full bg-[#ff5540] animate-pulse"></span>
+          <h2 className="text-[19px] font-extrabold tracking-[-0.03em]">Venues near you</h2>
+          <span className="text-[12px] font-semibold text-white/45">{filteredVenues.length} found</span>
         </div>
-
-        <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
-          {matches.map((match) => (
-            <MatchCard key={match.id} match={match} />
-          ))}
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <div className="flex justify-between items-center">
-          <h3 className="text-xs font-bold text-[#c2c7d0] uppercase tracking-widest">
-            Trending Spikers
-          </h3>
-          <button className="text-xs text-[#00eefc] font-bold uppercase tracking-wider hover:underline">
-            View All
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div
-            onClick={() => {
-              if (!moments[0]) return;
-              setSelectedMoment(moments[0]);
-              router.push(`/detail?id=${encodeURIComponent(moments[0].id)}`);
-            }}
-            className="col-span-full h-44 md:h-60 rounded-2xl overflow-hidden border border-white/10 relative group cursor-pointer flex flex-col justify-end p-4"
-          >
-            <img
-              src={moments[0]?.imageUrl || "/globe.svg"}
-              alt={moments[0]?.title || "No moments yet"}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent"></div>
-
-            <span className="absolute top-3 right-3 bg-[#ff5540]/20 border border-[#ff5540]/40 px-2 py-0.5 rounded text-[9px] font-bold text-[#ff5540] uppercase tracking-wider">
-              {moments[0]?.rarity || "New"}
-            </span>
-
-            <div className="relative z-10 flex justify-between items-end">
-              <div>
-                <h4 className="text-sm font-display font-black text-white uppercase tracking-wide">
-                  {moments[0]?.title || "No moments yet"}
-                </h4>
-                <p className="text-[11px] text-[#c2c7d0] font-medium">
-                  {moments[0]
-                    ? `${moments[0].match} • ${moments[0].minute}`
-                    : "Upload the first stadium moment"}
-                </p>
-              </div>
-              <div className="flex flex-col items-end text-right">
-                <span className="text-xs font-mono font-bold text-green-400">
-                  {moments[0] ? `${moments[0].views} views` : "—"}
-                </span>
-                <span className="text-xs font-mono font-bold text-white">
-                  {moments[0]
-                    ? `${moments[0].price} ${moments[0].tokenSymbol}`
-                    : "—"}
-                </span>
-              </div>
+        <div className="mt-4 flex flex-col gap-3">
+          {filteredVenues.map((venue) => <VenueCard key={venue.id} venue={venue} onOpen={() => openVenue(venue)} />)}
+          {!filteredVenues.length && (
+            <div className="rounded-[22px] border border-dashed border-white/15 bg-[#14141b] px-5 py-10 text-center">
+              <p className="text-[15px] font-bold text-white">No venues match that search.</p>
+              <button type="button" onClick={() => setSearchQuery("")} className="mt-3 text-[13px] font-bold text-lime">Clear search</button>
             </div>
-          </div>
-
-          {moments.slice(1, 3).map((moment) => (
-            <div
-              key={moment.id}
-              onClick={() => {
-                setSelectedMoment(moment);
-                router.push(`/detail?id=${encodeURIComponent(moment.id)}`);
-              }}
-              className="h-36 rounded-2xl overflow-hidden border border-white/10 relative group cursor-pointer flex flex-col justify-end p-3"
-            >
-              <img
-                src={moment.imageUrl}
-                alt={moment.title}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
-
-              <span
-                className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-black/60 border ${
-                  moment.rarity === "LEGENDARY"
-                    ? "border-amber-400 text-amber-400"
-                    : "border-[#00eefc] text-[#00eefc]"
-                }`}
-              >
-                {moment.rarity}
-              </span>
-
-              <div className="relative z-10 flex flex-col gap-0.5">
-                <h4 className="text-[12px] font-display font-extrabold text-white uppercase tracking-wide line-clamp-1">
-                  {moment.title}
-                </h4>
-                <div className="flex justify-between items-center mt-1">
-                  <span className="text-[9px] font-mono text-[#c2c7d0]">
-                    #{moment.serial.toString().padStart(4, "0")}
-                  </span>
-                  <span className="text-[11px] font-mono font-bold text-green-400">
-                    {moment.likes} likes
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-[#161B22]/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex flex-col gap-3 mb-6">
-        <h3 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-1">
-          <span className="material-symbols-outlined text-sm text-[#00eefc]">
-            military_tech
-          </span>
-          Top Capturers Leaderboard
-        </h3>
-        <div className="flex flex-col gap-2.5 pt-1">
-          {leaderboard.map((entry, index) => (
-          <div key={entry.username} className="flex items-center justify-between text-sm py-1 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[#c2c7d0] font-bold w-4">{index + 1}</span>
-              <img
-                src={entry.avatar}
-                alt={`${entry.username} avatar`}
-                className="w-6 h-6 rounded-full object-cover"
-              />
-              <span className="text-white font-bold font-mono text-[12px]">
-                @{entry.username}
-              </span>
-            </div>
-            <span className="text-xs font-mono font-bold text-[#00eefc]">
-              {entry.captures} captures
-            </span>
-          </div>
-          ))}
+          )}
         </div>
       </section>
     </div>

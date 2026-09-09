@@ -1,7 +1,6 @@
 import type { StateCreator } from "zustand";
 import type { AppStore, Moment } from "../types";
 import { playSound } from "../utils";
-import { authenticatedFetch } from "@/lib/authenticatedFetch";
 
 export interface BuySlice {
   isBuying: boolean;
@@ -23,32 +22,23 @@ export const createBuySlice: StateCreator<AppStore, [], [], BuySlice> = (
   handleBuyNFT: async (moment, purchaseOnChain) => {
     set({
       isBuying: true,
-      buyStatus: "Waiting for wallet signature...",
+      buyStatus: "Confirming your local collection...",
     });
-
-    const state = get();
-    if (!state.privyUserId) {
-      set({ isBuying: false, buyStatus: "Sign in to complete this purchase." });
-      return;
-    }
 
     try {
       const txnHash = await purchaseOnChain(moment);
-      set({ buyStatus: "On-chain purchase confirmed. Updating collection..." });
-      const response = await authenticatedFetch(`/api/moments/${moment.id}/purchase`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ txnHash }),
-      });
-      if (!response.ok) throw new Error("Purchase could not be saved");
-
-      const data = (await response.json()) as { moment: Moment };
+      const user = get().userWallet;
+      const purchased = {
+        ...moment,
+        txnHash,
+        isListed: false,
+        owner: { username: user.username, avatar: user.avatar, address: user.address },
+      };
       set({ isBuying: false, buySuccess: true });
-      get().setPersistedMoment(data.moment);
-      await Promise.all([
-        get().hydrateMarketplace(),
-        get().hydrateUserMoments(`user_${state.privyUserId}`),
-      ]);
+      get().setPersistedMoment(purchased);
+      set((state) => ({
+        collectedMoments: [purchased, ...state.collectedMoments.filter((item) => item.id !== purchased.id)],
+      }));
       playSound("success");
     } catch {
       set({ isBuying: false, buyStatus: "Purchase could not be saved. Please try again." });

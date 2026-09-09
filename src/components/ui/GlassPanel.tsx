@@ -9,9 +9,7 @@ interface Props {
 
 export default function GlassPanel({ children, className = "" }: Props) {
   return (
-    <div
-      className={`bg-[#161B22]/80 backdrop-blur-md border border-white/10 rounded-2xl ${className}`}
-    >
+    <div className={`rounded-[28px] bg-white ${className}`}>
       {children}
     </div>
   );

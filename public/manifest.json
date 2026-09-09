@@ -6,8 +6,8 @@
   "start_url": "/onboarding",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0B0E11",
-  "theme_color": "#0B0E11",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
   "orientation": "portrait",
   "icons": [
     {

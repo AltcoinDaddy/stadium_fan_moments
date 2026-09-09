@@ -1,117 +1,143 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "@/lib/router-compat";
 import { useAppStore } from "@/store";
-import MomentCard from "@/components/MomentCard";
-import ForYouFeed from "@/components/ForYouFeed";
+import { MOCK_MATCHES, type Match, type Moment } from "@/data/mockData";
 
-export default function MarketplaceScreen() {
-  const searchQuery = useAppStore((s) => s.searchQuery);
-  const setSearchQuery = useAppStore((s) => s.setSearchQuery);
-  const selectedClubFilter = useAppStore((s) => s.selectedClubFilter);
-  const setSelectedClubFilter = useAppStore((s) => s.setSelectedClubFilter);
-  const marketTab = useAppStore((s) => s.marketTab);
-  const setMarketTab = useAppStore((s) => s.setMarketTab);
-  const moments = useAppStore((s) => s.moments);
+const HERO_IMAGE = "/marketplace-stadium-hero.png";
 
-  const filteredMoments = useMemo(
-    () =>
-      moments.filter((m) => {
-        if (
-          selectedClubFilter !== "ALL" &&
-          m.tokenSymbol !== selectedClubFilter
-        )
-          return false;
-        if (searchQuery) {
-          const q = searchQuery.toLowerCase();
-          return (
-            m.title.toLowerCase().includes(q) ||
-            m.match.toLowerCase().includes(q) ||
-            m.location.toLowerCase().includes(q)
-          );
-        }
-        if (marketTab === "TRENDING")
-          return m.rarity === "EPIC" || m.rarity === "LEGENDARY";
-        if (marketTab === "LIVE") return m.category === "GOAL";
-        return true;
-      }),
-    [moments, selectedClubFilter, searchQuery, marketTab]
-  );
+const shortcuts = [
+  { label: "Captures", icon: "photo_camera", route: "/profile" },
+  { label: "Explore", icon: "explore", route: "/trending" },
+  { label: "Stadiums", icon: "stadium", route: "/trending" },
+  { label: "Live now", icon: "sensors", route: "/snap" },
+  { label: "My club", icon: "shield", route: "/profile" },
+] as const;
 
+function MatchTile({ match, onOpen }: { match: Match; onOpen: () => void }) {
+  const live = match.status === "LIVE";
 
   return (
-    <div className={`flex flex-col animate-fade ${marketTab === "FOR_YOU" ? "flex-1 min-h-0" : "p-4 gap-4"}`}>
-      <div className={`flex gap-2 w-full ${marketTab === "FOR_YOU" ? "p-4 pb-0" : ""}`}>
-        <div className="flex-1 bg-[#1d2023] border border-white/10 rounded-full h-11 flex items-center px-4 gap-2.5 focus-within:border-[#00eefc]/50 transition-colors">
-          <span className="material-symbols-outlined text-[#c2c7d0] text-lg">
-            search
-          </span>
-          <input
-            type="text"
-            placeholder="Search moments, matches..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-sm text-white placeholder-[#c2c7d0] border-none outline-none w-full"
-          />
+    <button
+      type="button"
+      onClick={onOpen}
+      className="w-[80%] shrink-0 overflow-hidden rounded-[22px] border border-white/10 bg-[#181820] text-left shadow-[0_16px_30px_rgba(0,0,0,0.28)] transition-transform active:scale-[0.98]"
+    >
+      <div className="relative h-32 overflow-hidden bg-[#253ba2]">
+        <img src={HERO_IMAGE} alt="" className="h-full w-full object-cover object-[55%_70%] opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#121219] via-transparent to-transparent" />
+        <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-extrabold ${live ? "bg-lime text-[#08080f]" : "bg-white/15 text-white"}`}>
+          {live ? `${match.time} LIVE` : "UPCOMING"}
+        </span>
+      </div>
+      <div className="px-3.5 pb-4 pt-3">
+        <div className="flex items-center justify-between gap-3">
+          <p className="truncate text-[15px] font-extrabold text-white">
+            {match.teamHome} vs {match.teamAway}
+          </p>
+          <span className="shrink-0 text-[13px] font-bold text-lime">{match.scoreHome}-{match.scoreAway}</span>
         </div>
+        <p className="mt-1 text-[12px] font-medium text-white/45">{match.location}</p>
       </div>
+    </button>
+  );
+}
 
-      <div className={`flex gap-2 overflow-x-auto no-scrollbar py-1 select-none ${marketTab === "FOR_YOU" ? "px-4" : "-mx-4 px-4"}`}>
-        {["ALL", "BAR", "PSG", "ACM", "CITY"].map((club) => (
-          <button
-            key={club}
-            onClick={() => setSelectedClubFilter(club)}
-            className={`px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider transition-all duration-200 shrink-0 ${
-              selectedClubFilter === club
-                ? "bg-[#00eefc]/10 border-[#00eefc] text-[#00eefc] shadow-[0_0_10px_rgba(0,238,252,0.15)]"
-                : "bg-[#1d2023] border-white/10 text-[#c2c7d0] hover:border-white/30"
-            }`}
-          >
-            {club === "ALL" ? "All Clubs" : club}
-          </button>
-        ))}
-      </div>
+export default function MarketplaceScreen({ initialMoments = [] }: { initialMoments?: Moment[] }) {
+  const moments = useAppStore((s) => s.moments);
+  const userWallet = useAppStore((s) => s.userWallet);
+  const setSuggestedCheckIn = useAppStore((s) => s.setSuggestedCheckIn);
+  const router = useRouter();
 
-      <div className={`flex border-b border-white/10 pb-1 mt-1 ${marketTab === "FOR_YOU" ? "px-4" : ""}`}>
-        {(["FOR_YOU", "TRENDING", "LIVE"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setMarketTab(tab)}
-            className={`flex-1 pb-3 text-xs font-bold uppercase tracking-widest text-center transition-colors relative ${
-              marketTab === tab ? "text-[#ffb4a8]" : "text-[#c2c7d0] hover:text-white"
-            }`}
-          >
-            {tab.replace("_", " ")}
-            {marketTab === tab && (
-              <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#ffb4a8] rounded-full"></div>
-            )}
-            {tab === "LIVE" && (
-              <span className="w-1.5 h-1.5 bg-[#ff5540] rounded-full absolute top-0 right-8 animate-ping"></span>
-            )}
-          </button>
-        ))}
-      </div>
+  const matches = useMemo(() => {
+    const listedCount = (moments.length ? moments : initialMoments).filter((moment) => moment.isListed).length;
+    return listedCount ? MOCK_MATCHES : MOCK_MATCHES.slice(0, 2);
+  }, [initialMoments, moments]);
 
-      {marketTab === "FOR_YOU" ? (
-        <ForYouFeed moments={filteredMoments} />
-      ) : (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-8">
-        {filteredMoments.length > 0 ? (
-          filteredMoments.map((moment) => (
-            <MomentCard key={moment.id} moment={moment} />
-          ))
-        ) : (
-          <div className="col-span-full text-center py-16 flex flex-col items-center justify-center gap-3">
-            <span className="material-symbols-outlined text-4xl text-[#c2c7d0]">
-              search_off
-            </span>
-            <p className="text-sm text-[#c2c7d0] font-semibold uppercase tracking-wider">
-              No moments found
+  const openMatch = (match: Match) => {
+    setSuggestedCheckIn(`${match.location} (${match.teamHomeSymbol} vs ${match.teamAwaySymbol})`);
+    router.push("/snap");
+  };
+
+  return (
+    <div className="min-h-full bg-[#08080f] pb-8 text-white">
+      <section className="relative min-h-[330px] overflow-hidden rounded-b-[32px] bg-[#1732a6]">
+        <img src={HERO_IMAGE} alt="Fans capturing a live football goal" className="absolute inset-0 h-full w-full object-cover object-[54%_64%]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#071163]/45 via-transparent to-[#08080f]" />
+
+        <header className="relative z-10 flex items-start justify-between px-5 pt-6">
+          <div>
+            <p className="text-[14px] font-semibold text-white/85">Good matchday,</p>
+            <p className="mt-0.5 text-[25px] font-extrabold tracking-[-0.04em] text-white">
+              {userWallet.username || "Fan"}
             </p>
           </div>
-        )}
+          <button
+            type="button"
+            aria-label="Open profile"
+            onClick={() => router.push("/profile")}
+            className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/35 bg-white/10 shadow-sm backdrop-blur-md"
+          >
+            <img src={userWallet.avatar} alt="" className="h-full w-full object-cover" />
+          </button>
+        </header>
+
+        <button
+          type="button"
+          onClick={() => router.push("/trending")}
+          className="absolute left-5 right-5 top-[235px] z-10 flex h-14 items-center gap-3 rounded-[18px] border border-white/10 bg-[#202025]/95 px-4 text-left shadow-[0_14px_35px_rgba(0,0,0,0.35)] backdrop-blur-md active:scale-[0.99]"
+        >
+          <span className="material-symbols-outlined text-[24px] text-white/70">search</span>
+          <span className="text-[15px] font-semibold text-white/45">Find a match, club, or stadium</span>
+        </button>
+      </section>
+
+      <div className="px-5">
+        <div className="mt-7 grid grid-cols-5 gap-2">
+          {shortcuts.map((shortcut) => (
+            <button
+              key={shortcut.label}
+              type="button"
+              onClick={() => router.push(shortcut.route)}
+              className="flex min-w-0 flex-col items-center gap-2 rounded-2xl py-1 active:scale-95"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-[#191922] text-lime shadow-[0_10px_20px_rgba(0,0,0,0.2)]">
+                <span className="material-symbols-outlined text-[23px]">{shortcut.icon}</span>
+              </span>
+              <span className="truncate text-[10px] font-semibold text-white/60">{shortcut.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-8 flex items-center justify-between">
+          <h1 className="text-[20px] font-extrabold tracking-[-0.03em] text-white">Your next match</h1>
+          <button type="button" onClick={() => router.push("/trending")} className="text-[13px] font-bold text-lime">
+            See all
+          </button>
+        </div>
+
+        <div className="-mx-5 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 no-scrollbar">
+          {matches.map((match) => (
+            <MatchTile key={match.id} match={match} onOpen={() => openMatch(match)} />
+          ))}
+        </div>
+
+        <div className="mt-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-[20px] font-extrabold tracking-[-0.03em] text-white">Live fan moments</h2>
+            <p className="mt-1 text-[13px] font-medium text-white/45">Fresh captures from the stands.</p>
+          </div>
+          <button
+            type="button"
+            aria-label="Open camera"
+            onClick={() => router.push("/snap")}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-lime text-[#08080f] shadow-[0_10px_24px_rgba(186,255,39,0.18)] active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[22px]">photo_camera</span>
+          </button>
+        </div>
       </div>
-      )}
     </div>
   );
 }

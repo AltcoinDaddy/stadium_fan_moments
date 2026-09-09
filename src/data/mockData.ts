@@ -117,23 +117,23 @@ export const MOCK_MATCHES: Match[] = [
 export const MOCK_MOMENTS: Moment[] = [
   {
     id: 'mom1',
-    title: 'Stunning Volley!',
-    description: 'In the 42nd minute, Mbappe controls a high crosses with exquisite cushion and strikes a bullet volley right into the corner. Captured from row 4, right behind the goal netting. Absolute madness in the stands.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBp-0m-z5pyKSlosc0TfExp1M5kBDknuqZvttFjKpylsgxw-FPgmmJYbZSy-AoCxXl7v3oFvqW1XJER4tU1U7DVDeA5ZF-Jo9lie3FymKSSFivnpQ_Nm2CRXtBQBvy39SPGELzng0Xbh1qQ7-MGLrrVF9kMsB87uM7mtHIPQ-4ZTjITve_mE79JDZPs8EdLHT5TH8_TEEpVeQZYH8PLhlfefC7t88u5ELWTszhwD1llwP3eEiy7CdJin4oDHu7X1L9lKPy33uXjACI',
+    title: 'Orange Drinks',
+    description: 'Refreshing summer cocktail with an orange slice at the Swipedrinks Festival. Perfect for cooling down!',
+    imageUrl: 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=800&q=80',
     category: 'GOAL',
     rarity: 'EPIC',
     price: 50,
     tokenSymbol: 'PSG',
-    match: 'PSG vs Milan',
+    match: 'Swipedrinks Festival',
     minute: "42'",
-    location: 'Parc des Princes',
+    location: 'Miami Beach',
     creator: {
-      username: 'UltrasParis99',
+      username: 'SummerVibes',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoQWEv1JjL9GDnCFZ_UsPpfINKPwPcDsH5iDRpzlbE6e92Z9MWbMHbKEz9UHheiojwvVcUkc45RQd-5uCJqgM_7SvYl3So5VnkiyTVKWSWQqMCRT0P4t1Pf0RL7T3jb4y4JbB7bAk7uvQryan0hxc3rqu6NZTVHHEF5A29jRptqFdLMpBLOBwzG_7DHmAW7jNhy7Aq05b3QAstPDUc4-KfTgfEDZvXL6gOqQCwQS8r40sFBUWrqnfjHOrK8WOhQFCQYfRU8dgh-Aw',
       address: '0x82f9A...923ad70'
     },
     owner: {
-      username: 'UltrasParis99',
+      username: 'SummerVibes',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoQWEv1JjL9GDnCFZ_UsPpfINKPwPcDsH5iDRpzlbE6e92Z9MWbMHbKEz9UHheiojwvVcUkc45RQd-5uCJqgM_7SvYl3So5VnkiyTVKWSWQqMCRT0P4t1Pf0RL7T3jb4y4JbB7bAk7uvQryan0hxc3rqu6NZTVHHEF5A29jRptqFdLMpBLOBwzG_7DHmAW7jNhy7Aq05b3QAstPDUc4-KfTgfEDZvXL6gOqQCwQS8r40sFBUWrqnfjHOrK8WOhQFCQYfRU8dgh-Aw',
       address: '0x82f9A...923ad70'
     },
@@ -147,23 +147,23 @@ export const MOCK_MOMENTS: Moment[] = [
   },
   {
     id: 'mom2',
-    title: 'Incredible Reflex Save',
-    description: 'Courtois stretches fully to make a breathtaking fingertip save in the 89th minute to preserve the clean sheet. Stadium was dead silent before erupting in relief.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAAdS7KCOklKpEQbtDVA_qA8fYVtHc-1L7CMBB7tIF0g7d34jtp38lBjtQC89_tyRCkfXtnvDm0uoSwepJj6fZ_w5F9l8RwQXroq5lfmYU-_Z0uBdLaHeK5oC7tl3lQEAf9XhNTREBQn2_SSMaZA7ya0PWi9I-gozjw06SkWR-MyZKIdEsPajCj4EYfQdlWX4NOwOBXQ7twxMdINcfTsXWkhTXWFlu5FAaym5UWaQFl71YcADeb0TGe12HtC628DxAv2UKQ5PtffQ4',
+    title: 'Vintage Kicks',
+    description: 'A beautiful pair of vintage sneakers from the 90s.',
+    imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
     category: 'SAVE',
     rarity: 'RARE',
     price: 120,
     tokenSymbol: 'BAR',
-    match: 'Real Madrid vs Barcelona',
+    match: 'SneakerCon 2026',
     minute: "89'",
-    location: 'Santiago Bernabéu',
+    location: 'London',
     creator: {
-      username: 'BernabeuVibes',
+      username: 'SneakerHead',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB21Vk8-t8OxW1hY0TSCFg51ZrJM2vUGAalifhd8KW47sO7hXlbRXF2cWPs23C6qc5Wcp9fOkxMWY9IJgmh8hc55DHW4tNvB1j9uwTPP_Knk_szfYzerYg9XA3cFnp4KxOoFaW4x4L3Q0KgH81gll89CVonozuM4ydtgyJHPbKDX73J85ygiRBrp2ccoGOIq8FwR4EGmFNTlNrIDt74niddDIQQDG918x_zbSh_QvZJAPRT-MZYHrZlp_ONYcvGsaLni6H-l5u1B-M',
       address: '0x1c8b9...f239aa8'
     },
     owner: {
-      username: 'BernabeuVibes',
+      username: 'SneakerHead',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB21Vk8-t8OxW1hY0TSCFg51ZrJM2vUGAalifhd8KW47sO7hXlbRXF2cWPs23C6qc5Wcp9fOkxMWY9IJgmh8hc55DHW4tNvB1j9uwTPP_Knk_szfYzerYg9XA3cFnp4KxOoFaW4x4L3Q0KgH81gll89CVonozuM4ydtgyJHPbKDX73J85ygiRBrp2ccoGOIq8FwR4EGmFNTlNrIDt74niddDIQQDG918x_zbSh_QvZJAPRT-MZYHrZlp_ONYcvGsaLni6H-l5u1B-M',
       address: '0x1c8b9...f239aa8'
     },
@@ -177,23 +177,23 @@ export const MOCK_MOMENTS: Moment[] = [
   },
   {
     id: 'mom3',
-    title: 'The Kop Erupts',
-    description: 'Captured in the final seconds of the Derby. The camera literally shakes from the sheer noise as the stadium bounces in unison to YNWA. Pure chill-inducing atmosphere.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8_MSfZ92t6WCc-_a0cZZ9H0_dwxJhGxVtSMBWYHIi4vL2XWf2onEAK4yXDt2ibwWlbCkxCV7as5VGqhzF5bXrc35IF7oaIFFLfLTtGSBkbSJPaYr7cLyV0ZfsSJhe0CgiIc2ZT3jrWuZyJDxY2H_JNmHtcYUk_nDbSR7A3M3YSqbpUKdSso9p1nRmdpzVdmxXx9Q_Ol8KyRRWjHpzKnJxpz-QKZ1yXZuMozcumEw4bcWBeoxiHKurpxolYpvP6FAkvs_hOND7U9E',
+    title: 'Minimal Watch',
+    description: 'Clean lines and modern aesthetics. This watch is the perfect daily driver.',
+    imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
     category: 'CROWD',
     rarity: 'LEGENDARY',
     price: 350,
-    tokenSymbol: 'BAR', // LIV not supported so let's default to BAR
-    match: 'Liverpool vs Manchester City',
+    tokenSymbol: 'BAR',
+    match: 'Timepiece Expo',
     minute: 'FT',
-    location: 'Anfield',
+    location: 'Geneva',
     creator: {
-      username: 'AnfieldRoads',
+      username: 'WatchFam',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoQWEv1JjL9GDnCFZ_UsPpfINKPwPcDsH5iDRpzlbE6e92Z9MWbMHbKEz9UHheiojwvVcUkc45RQd-5uCJqgM_7SvYl3So5VnkiyTVKWSWQqMCRT0P4t1Pf0RL7T3jb4y4JbB7bAk7uvQryan0hxc3rqu6NZTVHHEF5A29jRptqFdLMpBLOBwzG_7DHmAW7jNhy7Aq05b3QAstPDUc4-KfTgfEDZvXL6gOqQCwQS8r40sFBUWrqnfjHOrK8WOhQFCQYfRU8dgh-Aw',
       address: '0x9d2e1...83ac0f0'
     },
     owner: {
-      username: 'AnfieldRoads',
+      username: 'WatchFam',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoQWEv1JjL9GDnCFZ_UsPpfINKPwPcDsH5iDRpzlbE6e92Z9MWbMHbKEz9UHheiojwvVcUkc45RQd-5uCJqgM_7SvYl3So5VnkiyTVKWSWQqMCRT0P4t1Pf0RL7T3jb4y4JbB7bAk7uvQryan0hxc3rqu6NZTVHHEF5A29jRptqFdLMpBLOBwzG_7DHmAW7jNhy7Aq05b3QAstPDUc4-KfTgfEDZvXL6gOqQCwQS8r40sFBUWrqnfjHOrK8WOhQFCQYfRU8dgh-Aw',
       address: '0x9d2e1...83ac0f0'
     },
@@ -207,23 +207,23 @@ export const MOCK_MOMENTS: Moment[] = [
   },
   {
     id: 'mom4',
-    title: 'The Golden Boot Strike',
-    description: 'In the 89th minute, down by one, the tension was palpable. A perfectly timed through ball broke the defense line. With a single touch, he controlled it, and with the second, sent a thunderous strike into the top right corner. The stadium erupted. This moment captures the raw emotion of that equalizer, a testament to sheer willpower and skill on the grandest stage.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuASbHk1vAUcikvvoTZM62ai3owCWShuqkQL6OyUNs-wMbJmxykwdRTaHUOgh09iuF_K4yRmuPyvaO4SvNSNE75Asjh3lwWNmYFS9M5QZiuoF4hqGR1-QoC56fdsubflpAdqtn-VGqYODjyBTtg59FMJ6HHMGiI0bHuE6cPZeyTb7srvKVcy6F0lsnagbgzqcuvvB8UsGS9tVMgpuTTvwtUtVKh-QflMkni1OO6BSbHM7HdhcdcOw4F43kxYdmFhnCyjkiX5WXS73X8',
+    title: 'Studio Headphones',
+    description: 'High fidelity audio for the modern audiophile.',
+    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
     category: 'GOAL',
     rarity: 'EPIC',
     price: 250,
     tokenSymbol: 'BAR',
-    match: 'Champions League Final 2023',
+    match: 'Tech Meetup',
     minute: "89'",
-    location: 'Stade de France',
+    location: 'San Francisco',
     creator: {
-      username: 'MatchdayOfficial',
+      username: 'TechEnthusiast',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoQWEv1JjL9GDnCFZ_UsPpfINKPwPcDsH5iDRpzlbE6e92Z9MWbMHbKEz9UHheiojwvVcUkc45RQd-5uCJqgM_7SvYl3So5VnkiyTVKWSWQqMCRT0P4t1Pf0RL7T3jb4y4JbB7bAk7uvQryan0hxc3rqu6NZTVHHEF5A29jRptqFdLMpBLOBwzG_7DHmAW7jNhy7Aq05b3QAstPDUc4-KfTgfEDZvXL6gOqQCwQS8r40sFBUWrqnfjHOrK8WOhQFCQYfRU8dgh-Aw',
       address: '0xMatchdayOfficialAddress'
     },
     owner: {
-      username: 'MatchdayOfficial',
+      username: 'TechEnthusiast',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoQWEv1JjL9GDnCFZ_UsPpfINKPwPcDsH5iDRpzlbE6e92Z9MWbMHbKEz9UHheiojwvVcUkc45RQd-5uCJqgM_7SvYl3So5VnkiyTVKWSWQqMCRT0P4t1Pf0RL7T3jb4y4JbB7bAk7uvQryan0hxc3rqu6NZTVHHEF5A29jRptqFdLMpBLOBwzG_7DHmAW7jNhy7Aq05b3QAstPDUc4-KfTgfEDZvXL6gOqQCwQS8r40sFBUWrqnfjHOrK8WOhQFCQYfRU8dgh-Aw',
       address: '0xMatchdayOfficialAddress'
     },
@@ -242,7 +242,7 @@ export const MOCK_MY_CAPTURES: Moment[] = [
     id: 'my1',
     title: 'Bicycle Kick Derby Winner',
     description: 'Breathtaking overhead kick by Haaland to seal the Manchester Derby. Captured directly from Section 102. Stadium went absolute bonkers!',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB6ZIRzudW-RUEqrFS3WBYer_KW9llZ3QCgyYoLIxWq_fP6UPI7PVMbWnQ462Edq1CWfRbuBPnzRZEYG4dkkl4GH-ual6OcFBH4L26VeyJ6FzIrWWkqZKw2F-b3-G-UDkn-EBfyJcl0yQzvjfS2Q9bb1TsG4A-uo-iNo8W4b-tpjEO-S-nyzdp_SrhD_pnhvWlgwPWi8NP2g0kj4UIIUJTb4rvXF6z3mamo8Xfvk5KXBGmPdXfzZrkEZCXjw9d8ncY7wE5Xm0fnSzA',
+    imageUrl: 'https://images.unsplash.com/photo-1614632537190-23e4146777db?auto=format&fit=crop&w=800&q=80',
     category: 'GOAL',
     rarity: 'EPIC',
     price: 300,
@@ -272,7 +272,7 @@ export const MOCK_MY_CAPTURES: Moment[] = [
     id: 'my2',
     title: 'Crowd Eruption 90+4\'',
     description: 'Real Madrid vs Barcelona - Stadium crowd erupts in celebrations. Confetti raining down and flares lit up inside the stadium.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB46cfIiQBmYVkRBWqq7lnp5lNa--INo4lcU29v3pqGWb59KvXSw4NwhEd6QpThovlnVR1JF-ghhF25ISC_BvjS9cCYSu-GGitEEoE-zoXLBQYY7xEPQ4NqUny9Nupb37248B2e9U3-RHnD6KJI_ojLB6KvYDLlSskxRetN6YzFTNni6NnY3kUyZ9JtOpLQCltWBrCC3JZAsCEEvRCHeiwkYKL6Ss66TpyUTcEKFAdXvIRhndCc2eP_Gj6JHAj8b9opGNHI1j4akmM',
+    imageUrl: 'https://images.unsplash.com/photo-1558239080-692723c101b0?auto=format&fit=crop&w=800&q=80',
     category: 'CROWD',
     rarity: 'RARE',
     price: 150,

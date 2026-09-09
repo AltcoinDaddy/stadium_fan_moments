@@ -2,10 +2,6 @@
 
 import { useAppStore } from "@/store";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
-import { useSendTransaction, useWallets } from "@privy-io/react-auth";
-import { decodeEventLog, encodeFunctionData, parseEther } from "viem";
-import { chilizPublicClient, chilizSpicy } from "@/lib/chiliz";
-import { matchdayContractAddress, matchdayMomentsAbi } from "@/lib/matchdayContract";
 
 export default function CapturePreview() {
   const capturedMedia = useAppStore((s) => s.capturedMedia);
@@ -24,169 +20,118 @@ export default function CapturePreview() {
   const isMinting = useAppStore((s) => s.isMinting);
   const mintingStatus = useAppStore((s) => s.mintingStatus);
   const handleMintNFT = useAppStore((s) => s.handleMintNFT);
-  const { wallets } = useWallets();
-  const { sendTransaction } = useSendTransaction();
-
-  const mintOnChain = async ({ metadataUri, price }: { metadataUri: string; price: number }) => {
-    const wallet =
-      wallets.find((item) => item.walletClientType !== "privy") ||
-      wallets.find((item) => item.walletClientType === "privy");
-    if (!wallet || !matchdayContractAddress) throw new Error("Wallet or contract is unavailable");
-    await wallet.switchChain(chilizSpicy.id);
-    const { hash } = await sendTransaction(
-      {
-        chainId: chilizSpicy.id,
-        to: matchdayContractAddress,
-        data: encodeFunctionData({
-          abi: matchdayMomentsAbi,
-          functionName: "mintMoment",
-          args: [metadataUri, parseEther(String(price))],
-        }),
-      },
-      { address: wallet.address }
-    );
-    const receipt = await chilizPublicClient.waitForTransactionReceipt({ hash });
-    const log = receipt.logs
-      .map((item) => {
-        try {
-          return decodeEventLog({ abi: matchdayMomentsAbi, data: item.data, topics: item.topics });
-        } catch {
-          return null;
-        }
-      })
-      .find((item) => item?.eventName === "MomentMinted");
-    const tokenId = log?.args.tokenId;
-    if (tokenId === undefined) throw new Error("Mint event not found");
-    return { hash, tokenId: tokenId.toString() };
-  };
+  const mintOnChain = async () => ({
+    hash: `local-${Date.now().toString(16)}`,
+    tokenId: String(Date.now()),
+  });
 
   if (!capturedMedia) return null;
 
   return (
-    <div className="absolute inset-0 bg-[#0B0E11] z-50 flex flex-col p-4 overflow-y-auto no-scrollbar">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="absolute inset-0 z-50 flex flex-col overflow-y-auto bg-background p-5 no-scrollbar">
+      <div className="mb-4 flex items-center gap-3">
         <button
           onClick={() => setCapturedMedia(null)}
-          className="w-9 h-9 rounded-full bg-[#1d2023] flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-ink shadow-[0_6px_16px_rgba(17,17,17,0.06)] active:scale-90"
         >
           <span className="material-symbols-outlined text-lg">arrow_back</span>
         </button>
-        <span className="text-xs font-bold uppercase tracking-wider text-white">
-          Preview & Curation check
-        </span>
+        <span className="text-[15px] font-semibold text-ink">Preview and mint</span>
       </div>
 
-      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-black flex-shrink-0">
-        <img
-          src={capturedMedia.url}
-          alt="Captured preview"
-          className="w-full h-full object-cover"
-        />
+      <div className="relative aspect-[3/4] shrink-0 overflow-hidden rounded-[28px] bg-white">
+        {capturedMedia.type === "video" ? (
+          <video
+            src={capturedMedia.url}
+            aria-label="Captured video preview"
+            className="h-full w-full object-cover"
+            controls
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <img
+            src={capturedMedia.url}
+            alt="Captured preview"
+            className="h-full w-full object-cover"
+          />
+        )}
 
         {isCurationScanning && (
-          <>
-            <div className="absolute inset-0 scanline z-10"></div>
-            <div className="absolute inset-0 bg-black/40 z-0 flex flex-col items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-3xl text-[#00eefc] animate-spin">
-                cyclone
-              </span>
-              <span className="text-xs font-mono font-bold text-[#00eefc] animate-pulse uppercase tracking-wider">
-                AI Quality scanning...
-              </span>
-            </div>
-          </>
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-ink/40">
+            <span className="material-symbols-outlined animate-spin text-3xl text-lime">cyclone</span>
+            <span className="text-xs font-bold tracking-wide text-white">Quality scanning...</span>
+          </div>
         )}
 
         {!isCurationScanning && curationScore && (
-          <div className="absolute bottom-4 left-4 right-4 bg-[#161B22]/85 backdrop-blur-md border border-white/10 rounded-xl p-3 flex justify-between items-center z-10">
+          <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between rounded-[20px] bg-white p-3">
             <div>
-              <p className="text-[10px] text-[#c2c7d0] uppercase tracking-widest font-bold">
-                AI Curation Grade
-              </p>
-              <p className="text-lg font-display font-extrabold text-green-400 mt-0.5">
-                {curationScore}% PASSED
+              <p className="text-[11px] font-medium text-muted">Curation grade</p>
+              <p className="mt-0.5 text-lg font-extrabold text-ink">
+                {curationScore}% passed
               </p>
             </div>
-            <span
-              className={`px-3 py-1 rounded-full text-[10px] font-bold border ${
-                captureRarity === "EPIC"
-                  ? "border-[#ff5540] bg-[#ff5540]/10 text-[#ff5540]"
-                  : captureRarity === "RARE"
-                  ? "border-[#00eefc] bg-[#00eefc]/10 text-[#00eefc]"
-                  : "border-white/20 text-white"
-              }`}
-            >
-              {captureRarity} NFT
+            <span className="rounded-full bg-lime px-3 py-1 text-[10px] font-bold text-ink">
+              {captureRarity}
             </span>
           </div>
         )}
       </div>
 
-      <div className="flex flex-col gap-4 mt-4 mb-6">
+      <div className="mb-6 mt-5 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold text-[#c2c7d0] uppercase tracking-widest">
-            Describe the Moment
-          </label>
+          <label className="text-xs font-semibold text-muted">Describe the moment</label>
           <input
             type="text"
-            placeholder="e.g. Haaland bicycle kick right in front of row 4! Equalizer!"
+            placeholder="e.g. Bicycle kick from row 4"
             value={captureCaption}
             onChange={(e) => setCapturedCaption(e.target.value)}
-            className="h-11 bg-[#1d2023] border border-white/10 rounded-xl px-4 text-sm text-white focus:border-[#00eefc] outline-none transition-colors"
+            className="h-12 rounded-[18px] bg-white px-4 text-[15px] text-ink outline-none"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold text-[#c2c7d0] uppercase tracking-widest">
-            Listing Price (CHZ)
-          </label>
+          <label className="text-xs font-semibold text-muted">Listing price (CHZ)</label>
           <input
             type="number"
             min="1"
             step="1"
             value={capturePrice}
             onChange={(e) => setCapturePrice(Number(e.target.value))}
-            className="h-11 bg-[#1d2023] border border-white/10 rounded-xl px-4 text-sm text-white focus:border-[#00eefc] outline-none transition-colors"
+            className="h-12 rounded-[18px] bg-white px-4 text-[15px] text-ink outline-none"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold text-[#c2c7d0] uppercase tracking-widest">
-            Collectible Category
-          </label>
+          <label className="text-xs font-semibold text-muted">Category</label>
           <div className="grid grid-cols-3 gap-2">
-            {(["GOAL", "SAVE", "CELEBRATION", "CROWD", "TENSION"] as const).map(
-              (cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setCaptureCategory(cat)}
-                  className={`h-9 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                    captureCategory === cat
-                      ? "border-[#ff5540] bg-[#ff5540]/10 text-[#ff5540]"
-                      : "border-white/10 bg-[#1d2023] text-[#c2c7d0]"
-                  }`}
-                >
-                  {cat}
-                </button>
-              )
-            )}
+            {(["GOAL", "SAVE", "CELEBRATION", "CROWD", "TENSION"] as const).map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCaptureCategory(cat)}
+                className={`h-10 rounded-full text-[10px] font-bold tracking-wide transition-colors ${
+                  captureCategory === cat ? "bg-ink text-white" : "bg-white text-ink"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="bg-[#161B22]/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex justify-between items-center text-xs mt-1">
+        <div className="mt-1 flex items-center justify-between rounded-[24px] bg-mint p-4 text-sm">
           <div className="flex flex-col gap-1">
-            <span className="text-[#c2c7d0] uppercase tracking-widest font-bold">
-              Upload & Mint cost
-            </span>
-            <span className="text-sm font-bold text-white font-mono">
+            <span className="text-xs text-ink/70">Mint cost</span>
+            <span className="text-lg font-extrabold text-ink">
               {cameraMode === "photo" ? "10 CHZ" : "20 CHZ"}
             </span>
           </div>
           <div className="text-right">
-            <span className="text-[#c2c7d0] block font-bold uppercase tracking-widest">
-              Available Balance
-            </span>
-            <span className="font-mono text-[#00eefc] block mt-0.5">
+            <span className="block text-xs text-ink/70">Available</span>
+            <span className="mt-0.5 block font-semibold text-ink">
               {userWallet.chzBalance} CHZ
             </span>
           </div>
@@ -195,9 +140,9 @@ export default function CapturePreview() {
         <button
           onClick={() => void handleMintNFT(mintOnChain)}
           disabled={isCurationScanning || isMinting}
-          className="h-13 rounded-full bg-[#ff5540] text-white font-bold uppercase tracking-wider shadow-lg shadow-[#ff5540]/20 active:scale-98 disabled:opacity-50 transition-all mt-2"
+          className="mt-2 h-12 rounded-full bg-lime text-[15px] font-bold text-ink active:scale-[0.98] disabled:opacity-50"
         >
-          {isMinting ? "Minting Moment..." : "Mint & List collectible"}
+          {isMinting ? "Minting moment..." : "Mint and list"}
         </button>
       </div>
 

@@ -15,7 +15,7 @@ export const chilizSpicy = defineChain({
 
 export const chilizPublicClient = createPublicClient({
   chain: chilizSpicy,
-  transport: http(process.env.NEXT_PUBLIC_CHILIZ_RPC_URL || chilizSpicy.rpcUrls.default.http[0]),
+  transport: http(import.meta.env.VITE_CHILIZ_RPC_URL || chilizSpicy.rpcUrls.default.http[0]),
 });
 
 export async function getChzBalance(address: `0x${string}`) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/router-compat";
 import { useAppStore } from "@/store";
 import CapturePreview from "@/components/CapturePreview";
 
@@ -45,34 +45,34 @@ export default function SnapScreen() {
   }, [cameraPermission, setVideoElement]);
 
   return (
-    <div className="flex-1 flex flex-col relative overflow-hidden bg-black h-full">
-      <div className="absolute inset-0 w-full h-full z-0 bg-[#191c1f]">
+    <div className="relative flex h-full min-h-[100dvh] flex-1 flex-col overflow-hidden bg-ink">
+      <div className="absolute inset-0 z-0 bg-ink">
         {cameraPermission === "granted" ? (
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="w-full h-full object-cover opacity-90"
+            className="h-full w-full object-cover"
           />
         ) : (
           <img
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp67mGs7ImnLNJD0V0Ci05zU2cTmKt2NfS7-7udAD1i5tO3WjJ-mWTDNbsvMKXWCpoFUUw0F6_aLSiAbub-95mqjr8lzJJXsofsEprLtF3_zibHLYJJ8Z2yZrOk3rAXMF7-b672eJkEtXVtoFIPFXYJ_1FMR5n_Z4aO2q_QpDqbz_nRC-3VM6iPK7j6N5qIbHEdzOVFbGo9PuB2_Ud2xsmM4Pkq2bGp43XOQhxqMQxqBw2cws8XoDL30LfwlSfor33gxLLhszE190"
             alt="Simulated stadium camera viewfinder background"
-            className="w-full h-full object-cover opacity-75"
+            className="h-full w-full object-cover opacity-80"
           />
         )}
         {isRecording && (
-          <div className="absolute inset-0 scanline pointer-events-none z-10"></div>
+          <div className="scanline pointer-events-none absolute inset-0 z-10"></div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/90 z-10 pointer-events-none"></div>
+        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-ink/70 via-transparent to-ink/80"></div>
       </div>
 
-      <header className="relative z-20 w-full pt-4 px-4 flex flex-col gap-4">
-        <div className="flex justify-between items-center w-full">
+      <header className="relative z-20 flex w-full flex-col gap-4 px-4 pt-4">
+        <div className="flex w-full items-center justify-between">
           <button
             onClick={() => router.push("/marketplace")}
-            className="w-9 h-9 rounded-full bg-black/80 flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-ink transition-transform active:scale-90"
           >
             <span className="material-symbols-outlined text-lg">close</span>
           </button>
@@ -80,8 +80,8 @@ export default function SnapScreen() {
           <div className="flex gap-2">
             <button
               onClick={() => setIsFlashOn(!isFlashOn)}
-              className={`w-9 h-9 rounded-full flex items-center justify-center border border-white/10 active:scale-90 transition-transform ${
-                isFlashOn ? "bg-amber-400 text-black" : "bg-black/80 text-white"
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-transform active:scale-90 ${
+                isFlashOn ? "bg-lime text-ink" : "bg-white text-ink"
               }`}
             >
               <span className="material-symbols-outlined text-lg">
@@ -90,35 +90,36 @@ export default function SnapScreen() {
             </button>
             <button
               onClick={requestCamera}
-              className="w-9 h-9 rounded-full bg-black/80 flex items-center justify-center text-white border border-white/10 active:scale-90 transition-transform"
+              aria-label="Switch camera"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-ink transition-transform active:scale-90"
             >
-              <span className="material-symbols-outlined text-lg">
-                cameraswitch
-              </span>
+              <span className="material-symbols-outlined text-lg">cameraswitch</span>
             </button>
           </div>
         </div>
 
-        <div className="flex justify-center w-full">
-          <div className="bg-[#1D2023]/95 border border-[#00eefc]/30 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-[0_4px_16px_rgba(0,238,252,0.15)] select-none">
-            <div className="relative flex items-center justify-center w-2 h-2">
-              <div className="absolute w-full h-full bg-[#00eefc] rounded-full animate-ping opacity-75"></div>
-              <div className="relative w-2 h-2 rounded-full bg-[#00eefc]"></div>
+        <div className="flex w-full justify-center">
+          <button
+            onClick={requestLocation}
+            title="Retry stadium verification"
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-[#15151d]/85 px-4 py-1.5 select-none backdrop-blur-md"
+          >
+            <div className="relative flex h-2 w-2 items-center justify-center">
+              <div className="absolute h-full w-full animate-ping rounded-full bg-lime opacity-75"></div>
+              <div className="relative h-2 w-2 rounded-full bg-lime"></div>
             </div>
-            <span className="text-[10px] font-bold text-[#c2c7d0] uppercase tracking-widest">
-              Geo-CheckIn
-            </span>
-            <span className="text-xs font-semibold text-white truncate max-w-[180px]">
+            <span className="text-[10px] font-bold tracking-wide text-white/55">Check-in</span>
+            <span className="max-w-[180px] truncate text-xs font-semibold text-white">
               {suggestedCheckIn}
             </span>
-          </div>
+          </button>
         </div>
 
         {isRecording && (
-          <div className="flex justify-center w-full mt-1">
-            <div className="bg-[#ff5540]/40 border border-[#ff5540]/50 rounded-md px-3 py-1 flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-[#ff5540] animate-pulse"></div>
-              <span className="text-xs font-mono font-bold text-[#ffb4a8] tracking-widest">
+          <div className="mt-1 flex w-full justify-center">
+            <div className="flex items-center gap-1.5 rounded-full bg-lime px-3 py-1">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-ink"></div>
+              <span className="font-mono text-xs font-bold tracking-widest text-ink">
                 00:{recordingSeconds.toString().padStart(2, "0")}
               </span>
             </div>
@@ -126,17 +127,15 @@ export default function SnapScreen() {
         )}
       </header>
 
-      <footer className="relative z-20 w-full pb-8 px-4 flex flex-col gap-5 mt-auto select-none">
-        <div className="flex justify-center gap-6 text-xs font-bold w-full">
+      <footer className="relative z-20 mt-auto flex w-full flex-col gap-5 px-4 pb-8 select-none">
+        <div className="flex w-full justify-center gap-6 text-xs font-bold">
           <button
             onClick={() => {
               if (isRecording) return;
               setCameraMode("photo");
             }}
-            className={`transition-colors py-1 ${
-              cameraMode === "photo"
-                ? "text-[#00eefc] border-b-2 border-[#00eefc] font-black"
-                : "text-[#c2c7d0] hover:text-white"
+            className={`py-1 transition-colors ${
+              cameraMode === "photo" ? "border-b-2 border-lime text-lime" : "text-white/70"
             }`}
           >
             PHOTO
@@ -146,25 +145,21 @@ export default function SnapScreen() {
               if (isRecording) return;
               setCameraMode("video");
             }}
-            className={`transition-colors py-1 ${
-              cameraMode === "video"
-                ? "text-[#ff5540] border-b-2 border-[#ff5540] font-black"
-                : "text-[#c2c7d0] hover:text-white"
+            className={`py-1 transition-colors ${
+              cameraMode === "video" ? "border-b-2 border-lime text-lime" : "text-white/70"
             }`}
           >
             VIDEO
           </button>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar w-full py-0.5">
+        <div className="flex w-full gap-2 overflow-x-auto py-0.5 no-scrollbar">
           {["Goal", "Celebration", "Save", "Crowd", "Tension"].map((tag) => (
             <button
               key={tag}
               onClick={() => setActiveCaptureTag(tag)}
-              className={`shrink-0 px-3.5 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                activeCaptureTag === tag
-                  ? "border-[#00eefc] bg-[#00eefc]/10 text-[#00eefc]"
-                  : "border-white/10 bg-black/45 text-[#c2c7d0] hover:text-white"
+              className={`shrink-0 rounded-full px-3.5 py-1.5 text-[10px] font-bold tracking-wide transition-colors ${
+                activeCaptureTag === tag ? "bg-lime text-ink" : "bg-white/15 text-white"
               }`}
             >
               {tag}
@@ -172,56 +167,52 @@ export default function SnapScreen() {
           ))}
         </div>
 
-        <div className="flex justify-between items-center w-full mt-1 px-4">
+        <div className="mt-1 flex w-full items-center justify-between px-4">
           <button
+            aria-label="Open photo library"
             onClick={() => window.alert("Mintable moments must be captured live with the stadium camera.")}
-            className="w-12 h-12 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-white overflow-hidden active:scale-95 transition-transform"
+            className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white text-ink transition-transform active:scale-95"
           >
-            <span className="material-symbols-outlined text-xl">
-              photo_library
-            </span>
+            <span className="material-symbols-outlined text-xl">photo_library</span>
           </button>
 
           <div className="flex flex-col items-center gap-2">
             {cameraMode === "video" ? (
               <button
-                onClick={
-                  isRecording ? handleStopRecording : handleStartRecording
-                }
-                className="relative w-20 h-20 rounded-full border-[3px] border-white/50 flex items-center justify-center p-1 active:scale-95 transition-transform duration-150"
+                aria-label={isRecording ? "Stop video recording" : "Start video recording"}
+                onClick={isRecording ? handleStopRecording : handleStartRecording}
+                className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white/70 p-1 transition-transform duration-150 active:scale-95"
               >
-                <div className="absolute inset-[-6px] rounded-full border border-[#ff5540]/30 recording-pulse pointer-events-none"></div>
-                <div className="w-full h-full rounded-full flex items-center justify-center bg-[#ff5540]">
+                <div className="recording-pulse pointer-events-none absolute inset-[-6px] rounded-full border border-lime/40"></div>
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-lime">
                   {isRecording ? (
-                    <div className="w-5 h-5 rounded-[4px] bg-white transition-all duration-300"></div>
+                    <div className="h-5 w-5 rounded-[4px] bg-ink transition-all duration-300"></div>
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-white transition-all duration-300"></div>
+                    <div className="h-6 w-6 rounded-full bg-ink transition-all duration-300"></div>
                   )}
                 </div>
               </button>
             ) : (
               <button
+                aria-label="Take photo"
                 onClick={handlePhotoSnap}
-                className="relative w-20 h-20 rounded-full border-[3px] border-white/50 flex items-center justify-center p-1 active:scale-95 transition-transform duration-150"
+                className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white/70 p-1 transition-transform duration-150 active:scale-95"
               >
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center shadow-lg shadow-white/15"></div>
+                <div className="h-full w-full rounded-full bg-lime"></div>
               </button>
             )}
-            <span className="text-[10px] font-mono text-[#c2c7d0] bg-black/50 px-2 py-0.5 rounded-full border border-white/5 flex items-center gap-0.5">
-              <span className="material-symbols-outlined text-[10px]">
-                token
-              </span>
+            <span className="flex items-center gap-0.5 rounded-full bg-white px-2 py-0.5 font-mono text-[10px] text-[#08080f]">
+              <span className="material-symbols-outlined text-[10px]">token</span>
               {cameraMode === "photo" ? "10 CHZ to Mint" : "20 CHZ to Mint"}
             </span>
           </div>
 
           <button
+            aria-label="Switch camera"
             onClick={requestCamera}
-            className="w-12 h-12 rounded-full bg-black/80 border border-white/10 flex items-center justify-center text-white active:scale-95 transition-transform"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-ink transition-transform active:scale-95"
           >
-            <span className="material-symbols-outlined text-xl">
-              cameraswitch
-            </span>
+            <span className="material-symbols-outlined text-xl">cameraswitch</span>
           </button>
         </div>
       </footer>

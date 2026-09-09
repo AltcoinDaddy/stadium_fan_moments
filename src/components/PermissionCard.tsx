@@ -17,35 +17,37 @@ export default function PermissionCard({
   permission,
   onGrant,
 }: Props) {
+  const granted = permission === "granted";
+  const blocked = permission === "denied";
+
   return (
-    <div className="bg-[#161B22]/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex justify-between items-center">
-      <div className="flex items-center gap-3">
+    <div className={`flex items-center justify-between rounded-[22px] border p-4 transition-colors ${
+      granted ? "border-lime/35 bg-lime/[0.06]" : "border-white/10 bg-[#191922]"
+    }`}>
+      <div className="flex min-w-0 items-center gap-3">
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center ${
-            permission === "granted"
-              ? "bg-green-500/20 text-green-400"
-              : "bg-[#1d2023] text-[#c2c7d0]"
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
+            granted ? "bg-lime text-ink" : "bg-white/10 text-white"
           }`}
         >
           <span className="material-symbols-outlined text-xl">{icon}</span>
         </div>
-        <div>
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-            {title}
-          </h4>
-          <p className="text-xs text-[#c2c7d0]">{subtitle}</p>
+        <div className="min-w-0">
+          <h4 className="text-sm font-semibold text-white">{title}</h4>
+          <p className={`mt-0.5 truncate text-xs ${blocked ? "text-[#ffb4ab]" : "text-white/45"}`}>{subtitle}</p>
         </div>
       </div>
-      {permission === "granted" ? (
-        <span className="material-symbols-outlined text-green-400 font-bold">
-          check_circle
+      {granted ? (
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-lime/15 text-lime">
+          <span className="material-symbols-outlined text-[18px]">check</span>
         </span>
       ) : (
         <button
+          type="button"
           onClick={onGrant}
-          className="px-4 py-1.5 rounded-full bg-[#00eefc] text-black text-xs font-bold active:scale-95 transition-transform"
+          className="ml-3 shrink-0 rounded-full bg-lime px-4 py-2 text-xs font-extrabold text-[#08080f] transition-transform active:scale-95"
         >
-          Grant
+          {permission === "prompt" ? "Grant" : "Retry"}
         </button>
       )}
     </div>

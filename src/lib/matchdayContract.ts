@@ -1,5 +1,6 @@
-export const matchdayContractAddress = process.env
-  .NEXT_PUBLIC_MATCHDAY_CONTRACT_ADDRESS as `0x${string}` | undefined;
+export const matchdayContractAddress = import.meta.env.VITE_MATCHDAY_CONTRACT_ADDRESS as
+  | `0x${string}`
+  | undefined;
 
 export const matchdayMomentsAbi = [
   {

@@ -13,8 +13,9 @@
 # testing
 /coverage
 
-# next.js
-/.next/
+# TanStack Start / Vite
+/.output/
+/.tanstack-router/
 /out/
 
 # production

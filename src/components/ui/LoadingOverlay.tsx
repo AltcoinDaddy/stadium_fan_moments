@@ -8,19 +8,14 @@ interface Props {
 
 export default function LoadingOverlay({ title, status, subtitle }: Props) {
   return (
-    <div className="absolute inset-0 bg-[#0B0E11]/95 z-50 flex flex-col items-center justify-center p-6 text-center">
-      <div className="relative w-16 h-16 mb-6">
-        <div className="absolute inset-0 rounded-full border-4 border-[#ff5540]/20 border-t-[#ff5540] animate-spin"></div>
-        <div className="absolute inset-2 rounded-full border-4 border-[#00eefc]/10 border-t-[#00eefc] animate-spin duration-700"></div>
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/95 p-6 text-center">
+      <div className="relative mb-6 h-14 w-14">
+        <div className="absolute inset-0 animate-spin rounded-full border-4 border-line border-t-lime" />
       </div>
-      <h3 className="text-lg font-display font-extrabold text-white uppercase tracking-wider">
-        {title}
-      </h3>
-      <p className="text-sm font-mono text-[#00eefc] mt-3 animate-pulse">
-        {status}
-      </p>
+      <h3 className="text-lg font-extrabold text-ink">{title}</h3>
+      <p className="mt-3 text-sm font-medium text-muted">{status}</p>
       {subtitle && (
-        <p className="text-xs text-[#c2c7d0] mt-12 max-w-xs leading-relaxed">
+        <p className="mt-10 max-w-xs text-xs leading-relaxed text-muted">
           {subtitle}
         </p>
       )}

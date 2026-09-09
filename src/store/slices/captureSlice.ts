@@ -6,7 +6,6 @@ import type {
   Moment,
 } from "../types";
 import { playSound } from "../utils";
-import { authenticatedFetch } from "@/lib/authenticatedFetch";
 
 export interface CaptureSlice {
   captureCaption: string;
@@ -67,51 +66,12 @@ export const createCaptureSlice: StateCreator<
     set({ isMinting: true, mintingStatus: "Compressing media file..." });
 
     const initialState = get();
-    const captureUrl = initialState.capturedMedia?.url;
-    let mediaUrl = captureUrl;
-
-    if (captureUrl?.startsWith("blob:") || captureUrl?.startsWith("data:")) {
-      try {
-        const blob = await fetch(captureUrl).then((response) => response.blob());
-        const form = new FormData();
-        form.append("file", blob, `matchday-${Date.now()}.${blob.type.split("/")[1] || "bin"}`);
-        const uploadResponse = await authenticatedFetch("/api/uploads", {
-          method: "POST",
-          body: form,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error("Pinata upload is not configured");
-        }
-
-        const upload = (await uploadResponse.json()) as { url: string };
-        mediaUrl = upload.url;
-      } catch {
-        set({ isMinting: false, mintingStatus: "Media upload failed. Check Pinata configuration." });
-        return;
-      }
-    }
+    const mediaUrl = initialState.capturedMedia?.url;
 
     let onChain: { hash: string; tokenId: string };
     try {
-      set({ mintingStatus: "Uploading metadata to decentralised storage..." });
-      const metadataResponse = await authenticatedFetch("/api/metadata", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: initialState.captureCaption || "Stadium Fan Moment",
-          description: `Fan-captured ${initialState.captureCategory} moment.`,
-          image: mediaUrl,
-          attributes: [
-            { trait_type: "Category", value: initialState.captureCategory },
-            { trait_type: "Rarity", value: initialState.captureRarity },
-          ],
-        }),
-      });
-      if (!metadataResponse.ok) throw new Error("Metadata upload failed");
-      const metadata = (await metadataResponse.json()) as { uri: string };
-      set({ mintingStatus: "Waiting for wallet signature..." });
-      onChain = await mintOnChain({ metadataUri: metadata.uri, price: initialState.capturePrice });
+      set({ mintingStatus: "Creating your local fan moment..." });
+      onChain = await mintOnChain({ metadataUri: "local://fanmoment", price: initialState.capturePrice });
     } catch {
       set({ isMinting: false, mintingStatus: "Mint transaction was not completed." });
       return;
@@ -182,45 +142,6 @@ export const createCaptureSlice: StateCreator<
               capturePrice: 50,
             }));
 
-            if (state.privyUserId) {
-              const userId = `user_${state.privyUserId}`;
-              void authenticatedFetch("/api/moments", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  id: newMoment.id,
-                  title: newMoment.title,
-                  description: newMoment.description,
-                  mediaUrl: newMoment.imageUrl,
-                  mediaType: state.capturedMedia?.type === "video" ? "video" : "image",
-                  category: newMoment.category,
-                  rarity: newMoment.rarity,
-                  price: newMoment.price,
-                  tokenSymbol: newMoment.tokenSymbol,
-                  match: newMoment.match,
-                  minute: newMoment.minute,
-                  location: newMoment.location,
-                  tokenId: newMoment.tokenId,
-                  txnHash: newMoment.txnHash,
-                  serial: newMoment.serial,
-                  maxSerial: newMoment.maxSerial,
-                  likes: newMoment.likes,
-                  views: newMoment.views,
-                  isListed: 1,
-                  stadiumCheckInToken: state.stadiumCheckInToken,
-                }),
-              })
-                .then((response) => {
-                  if (!response.ok) return;
-                  return Promise.all([
-                    get().hydrateMarketplace(),
-                    get().hydrateUserMoments(userId),
-                  ]);
-                })
-                .catch(() => {
-                  // The local capture remains usable if the database is unavailable.
-                });
-            }
             playSound("success");
             get().setNavigateTo("/marketplace");
           }, 1200);

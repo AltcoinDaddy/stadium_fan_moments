@@ -1,4 +1,4 @@
-const CACHE_NAME = "matchday-v2";
+const CACHE_NAME = "matchday-v4";
 const APP_SHELL = ["/", "/onboarding", "/offline.html", "/manifest.json", "/icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -19,6 +19,7 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
+  if (url.pathname.startsWith("/node_modules/") || url.pathname.startsWith("/@vite/") || url.pathname.startsWith("/src/")) return;
 
   if (request.mode === "navigate") {
     event.respondWith(
