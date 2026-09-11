@@ -48,6 +48,7 @@ export interface Match {
   activeCapturers: number;
   suggestionTags: string[];
   location: string;
+  stadiumImageUrl?: string;
 }
 
 export const MOCK_USER = {

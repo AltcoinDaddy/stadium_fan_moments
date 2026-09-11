@@ -371,6 +371,7 @@ api.get("/sports/matches", async (c) => {
       activeCapturers: 0,
       suggestionTags: [],
       location: String(event.strVenue || event.strLeague || "Stadium"),
+      stadiumImageUrl: event.strThumb ? String(event.strThumb) : undefined,
     }));
     return c.json({ matches });
   } catch {

@@ -67,14 +67,14 @@ export default function CapturePreview() {
         )}
 
         {!isCurationScanning && curationScore && (
-          <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between rounded-[20px] bg-white p-3">
+          <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between rounded-[20px] bg-white p-3 shadow-lg">
             <div>
-              <p className="text-[11px] font-medium text-muted">Curation grade</p>
-              <p className="mt-0.5 text-lg font-extrabold text-ink">
+              <p className="text-[11px] font-medium text-black/50">Curation grade</p>
+              <p className="mt-0.5 text-lg font-extrabold text-black">
                 {curationScore}% passed
               </p>
             </div>
-            <span className="rounded-full bg-lime px-3 py-1 text-[10px] font-bold text-ink">
+            <span className="rounded-full bg-lime px-3 py-1 text-[10px] font-bold text-black">
               {captureRarity}
             </span>
           </div>
@@ -83,37 +83,37 @@ export default function CapturePreview() {
 
       <div className="mb-6 mt-5 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-muted">Describe the moment</label>
+          <label className="text-xs font-semibold text-white/60">Describe the moment</label>
           <input
             type="text"
             placeholder="e.g. Bicycle kick from row 4"
             value={captureCaption}
             onChange={(e) => setCapturedCaption(e.target.value)}
-            className="h-12 rounded-[18px] bg-white px-4 text-[15px] text-ink outline-none"
+            className="h-12 rounded-[18px] bg-white px-4 text-[15px] text-black placeholder:text-black/30 outline-none"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-muted">Listing price (CHZ)</label>
+          <label className="text-xs font-semibold text-white/60">Listing price (CHZ)</label>
           <input
             type="number"
             min="1"
             step="1"
             value={capturePrice}
             onChange={(e) => setCapturePrice(Number(e.target.value))}
-            className="h-12 rounded-[18px] bg-white px-4 text-[15px] text-ink outline-none"
+            className="h-12 rounded-[18px] bg-white px-4 text-[15px] text-black placeholder:text-black/30 outline-none"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-muted">Category</label>
+          <label className="text-xs font-semibold text-white/60">Category</label>
           <div className="grid grid-cols-3 gap-2">
             {(["GOAL", "SAVE", "CELEBRATION", "CROWD", "TENSION"] as const).map((cat) => (
               <button
                 key={cat}
                 onClick={() => setCaptureCategory(cat)}
                 className={`h-10 rounded-full text-[10px] font-bold tracking-wide transition-colors ${
-                  captureCategory === cat ? "bg-ink text-white" : "bg-white text-ink"
+                  captureCategory === cat ? "bg-lime text-black" : "bg-white text-black/70"
                 }`}
               >
                 {cat}
@@ -122,16 +122,16 @@ export default function CapturePreview() {
           </div>
         </div>
 
-        <div className="mt-1 flex items-center justify-between rounded-[24px] bg-mint p-4 text-sm">
+        <div className="mt-1 flex items-center justify-between rounded-[24px] bg-mint p-4 text-sm shadow-sm">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-ink/70">Mint cost</span>
-            <span className="text-lg font-extrabold text-ink">
+            <span className="text-xs font-semibold text-black/60">Mint cost</span>
+            <span className="text-lg font-extrabold text-black">
               {cameraMode === "photo" ? "10 CHZ" : "20 CHZ"}
             </span>
           </div>
           <div className="text-right">
-            <span className="block text-xs text-ink/70">Available</span>
-            <span className="mt-0.5 block font-semibold text-ink">
+            <span className="block text-xs font-semibold text-black/60">Available</span>
+            <span className="mt-0.5 block font-bold text-black">
               {userWallet.chzBalance} CHZ
             </span>
           </div>
@@ -140,7 +140,7 @@ export default function CapturePreview() {
         <button
           onClick={() => void handleMintNFT(mintOnChain)}
           disabled={isCurationScanning || isMinting}
-          className="mt-2 h-12 rounded-full bg-lime text-[15px] font-bold text-ink active:scale-[0.98] disabled:opacity-50"
+          className="mt-2 h-12 rounded-full bg-lime text-[15px] font-bold text-black shadow-md active:scale-[0.98] disabled:opacity-50"
         >
           {isMinting ? "Minting moment..." : "Mint and list"}
         </button>

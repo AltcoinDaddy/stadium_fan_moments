@@ -122,55 +122,62 @@ export default function DetailScreen({
 
   return (
     <div className="relative flex min-h-full flex-col bg-background">
-      <header className="flex items-center justify-between px-5 pt-5">
-        <button
-          onClick={() => {
-            router.back();
-            setBuySuccess(false);
-          }}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-ink active:scale-90"
-        >
-          <span className="material-symbols-outlined text-[22px]">chevron_left</span>
-        </button>
-        <h1 className="text-[15px] font-semibold text-ink">Event details</h1>
-        <button
-          onClick={() => playSound("click")}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-ink active:scale-90"
-        >
-          <span className="material-symbols-outlined text-[20px]">add</span>
-        </button>
-      </header>
-
-      <div className="mt-6 px-5">
-        <div
-          className="relative rounded-[32px] px-5 pb-8 pt-8"
-          style={{ backgroundColor: categoryPastel(selectedMoment.category) }}
-        >
-          <button
-            type="button"
-            className="absolute right-4 top-4 text-ink/40"
-            onClick={() => playSound("click")}
-          >
-            <span className="material-symbols-outlined">more_vert</span>
-          </button>
-          <div className="mx-auto flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full bg-white/80">
-            {selectedMoment.imageUrl ? (
-              <img src={selectedMoment.imageUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <span className="material-symbols-outlined text-[28px] text-ink">
-                {categoryIcon(selectedMoment.category)}
-              </span>
-            )}
+      <section className="relative min-h-[400px] overflow-hidden rounded-b-[32px] bg-[#1a1a20]">
+        {selectedMoment.imageUrl ? (
+          <img
+            src={selectedMoment.imageUrl}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-90 saturate-[0.85]"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#15151d]">
+            <span className="material-symbols-outlined text-[64px] text-white/10">
+              {categoryIcon(selectedMoment.category)}
+            </span>
           </div>
-          <h2 className="mt-5 text-center text-[26px] font-extrabold leading-tight tracking-[-0.03em] text-ink">
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#181820]/80 via-black/40 to-[#08080f]/95" />
+
+        <header className="relative z-10 flex items-center justify-between px-5 pt-5">
+          <button
+            onClick={() => {
+              router.back();
+              setBuySuccess(false);
+            }}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md active:scale-90"
+          >
+            <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+          </button>
+          <button
+            onClick={() => playSound("click")}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md active:scale-90"
+          >
+            <span className="material-symbols-outlined text-[20px]">more_vert</span>
+          </button>
+        </header>
+
+        <div className="absolute bottom-8 left-0 w-full px-6">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="rounded-full bg-lime/20 px-2.5 py-1 text-[11px] font-extrabold text-lime backdrop-blur-md">
+              {selectedMoment.category}
+            </span>
+            <span className="rounded-full bg-black/40 px-2.5 py-1 text-[11px] font-extrabold text-white/80 backdrop-blur-md border border-white/10">
+              {selectedMoment.rarity}
+            </span>
+          </div>
+          <h2 className="text-[28px] font-extrabold leading-tight tracking-[-0.03em] text-white drop-shadow-md">
             {selectedMoment.title}
           </h2>
-          <p className="mt-2 text-center text-[13px] font-medium text-ink/55">
-            Created {new Date(selectedMoment.timestamp).toLocaleDateString()}
+          <p className="mt-2 flex items-center gap-1.5 text-[14px] font-medium text-white/70">
+            <span className="material-symbols-outlined text-[16px]">calendar_today</span>
+            {new Date(selectedMoment.timestamp).toLocaleDateString()}
           </p>
         </div>
+      </section>
 
-        <div className="relative z-10 -mt-5 rounded-[24px] bg-sky px-4 py-3.5">
+      <div className="px-5">
+
+        <div className="relative z-10 -mt-5 rounded-[24px] border border-white/5 bg-[#252530] px-4 py-3.5 shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
@@ -194,16 +201,13 @@ export default function DetailScreen({
         <p className="text-[12px] font-semibold tracking-[0.08em] text-muted">GROUP TOKENS</p>
         <div className="mt-3 flex flex-col">
           {[
-            { name: selectedMoment.creator.username, role: "Creator", icon: categoryIcon(selectedMoment.category), color: categoryPastel(selectedMoment.category) },
-            { name: selectedMoment.owner.username, role: "Owner", icon: "person", color: "#CDE4F4" },
+            { name: selectedMoment.creator.username, role: "Creator", icon: categoryIcon(selectedMoment.category) },
+            { name: selectedMoment.owner.username, role: "Owner", icon: "person" },
           ].map((row) => (
             <div key={row.role} className="flex items-center justify-between py-3">
               <div className="flex items-center gap-3">
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-full"
-                  style={{ backgroundColor: row.color }}
-                >
-                  <span className="material-symbols-outlined text-[20px] text-ink">{row.icon}</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 border border-white/5">
+                  <span className="material-symbols-outlined text-[20px] text-white">{row.icon}</span>
                 </div>
                 <p className="text-[15px] font-semibold text-ink">{row.name}</p>
               </div>
@@ -236,20 +240,20 @@ export default function DetailScreen({
               : "List for resale"}
           </button>
         ) : isOwner ? (
-          <div className="flex h-12 items-center justify-center rounded-full bg-mint px-6 text-[14px] font-bold text-ink">
+          <div className="flex h-12 items-center justify-center rounded-full bg-mint px-6 text-[14px] font-bold text-black">
             You own this
           </div>
         ) : buySuccess ? (
-          <div className="flex h-12 items-center justify-center rounded-full bg-lime px-6 text-[14px] font-bold text-ink">
+          <div className="flex h-12 items-center justify-center rounded-full bg-lime px-6 text-[14px] font-bold text-black">
             Purchased
           </div>
         ) : (
           <button
             onClick={() => void handleBuyNFT(selectedMoment, purchaseOnChain)}
             disabled={isBuying}
-            className="flex h-12 items-center justify-center rounded-full bg-lime px-8 text-[14px] font-bold text-ink disabled:opacity-50"
+            className="flex h-12 items-center justify-center rounded-full bg-lime px-8 text-[14px] font-bold text-black disabled:opacity-50"
           >
-            {isBuying ? "Buying..." : "Buy moment"}
+            {isBuying ? "Processing..." : "Purchase moment"}
           </button>
         )}
       </div>

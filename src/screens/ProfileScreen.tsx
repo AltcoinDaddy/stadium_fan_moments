@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "@/lib/router-compat";
 import { useAppStore } from "@/store";
 import MomentCard from "@/components/MomentCard";
@@ -9,15 +9,47 @@ const COVER_IMAGE = "/marketplace-stadium-hero.png";
 
 function ProfileAvatar({ src, name }: { src?: string; name: string }) {
   const [imageFailed, setImageFailed] = useState(!src || src === "/globe.svg");
+  const setAuthenticatedUser = useAppStore((s) => s.setAuthenticatedUser);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => setImageFailed(!src || src === "/globe.svg"), [src]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setAuthenticatedUser({ avatar: result });
+        setImageFailed(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
-    <div className="flex h-[94px] w-[94px] items-center justify-center overflow-hidden rounded-full border-4 border-[#15151d] bg-[#1a1a20] shadow-[0_10px_28px_rgba(0,0,0,0.4)]">
+    <div 
+      className="relative flex h-[94px] w-[94px] cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 border-[#15151d] bg-[#1a1a20] shadow-[0_10px_28px_rgba(0,0,0,0.4)] group"
+      onClick={() => fileInputRef.current?.click()}
+    >
       {imageFailed ? (
         <span className="material-symbols-outlined text-[48px] text-white/30">person</span>
       ) : (
         <img src={src} alt={`${name} profile photo`} onError={() => setImageFailed(true)} className="h-full w-full object-cover" />
       )}
+      
+      {/* Upload Overlay */}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="material-symbols-outlined text-[28px] text-white drop-shadow-md">photo_camera</span>
+      </div>
+
+      <input 
+        type="file" 
+        accept="image/*" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        className="hidden" 
+      />
     </div>
   );
 }
@@ -32,11 +64,11 @@ function StatCard({ icon, value, label }: { icon: string; value: string; label: 
   );
 }
 
-function Badge({ icon, label, tint }: { icon: string; label: string; tint: string }) {
+function Badge({ imgSrc, label }: { imgSrc: string; label: string }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-2 text-center">
-      <div className={`flex h-[72px] w-[72px] items-center justify-center rounded-[24px] border border-white/10 ${tint} shadow-[0_10px_22px_rgba(0,0,0,0.22)]`}>
-        <span className="material-symbols-outlined text-[36px] text-white drop-shadow-md">{icon}</span>
+      <div className="flex h-[72px] w-[72px] items-center justify-center rounded-[24px] border border-white/5 bg-[#1a1a20] shadow-[0_10px_22px_rgba(0,0,0,0.22)] overflow-hidden">
+        <img src={imgSrc} alt={label} className="h-full w-full object-cover" />
       </div>
       <p className="line-clamp-2 text-[11px] font-semibold leading-tight text-white/75">{label}</p>
     </div>
@@ -116,9 +148,9 @@ export default function ProfileScreen({ initialTab }: { initialTab?: "captures" 
             <button type="button" onClick={() => router.push("/trending")} className="text-[13px] font-semibold text-lime">See all</button>
           </div>
           <div className="flex items-start justify-between gap-3">
-            <Badge icon="flare" label="First capture" tint="bg-[#5b3eac]" />
-            <Badge icon="stadium" label="Match regular" tint="bg-[#b56e29]" />
-            <Badge icon="bookmark" label="Collector" tint="bg-[#304d9c]" />
+            <Badge imgSrc="/badge_first_capture_1789130746289.jpg" label="First capture" />
+            <Badge imgSrc="/badge_match_regular_1789130761079.jpg" label="Match regular" />
+            <Badge imgSrc="/badge_collector_1789130772282.jpg" label="Collector" />
           </div>
         </section>
 

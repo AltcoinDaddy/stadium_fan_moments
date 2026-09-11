@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "@/lib/router-compat";
 import { useAppStore } from "@/store";
 import { MOCK_MATCHES, type Match, type Moment } from "@/data/mockData";
+import ExploreMomentCard from "@/components/ExploreMomentCard";
 
 const HERO_IMAGE = "/marketplace-stadium-hero.png";
 
@@ -25,7 +26,7 @@ function MatchTile({ match, onOpen }: { match: Match; onOpen: () => void }) {
       className="w-[80%] shrink-0 overflow-hidden rounded-[22px] border border-white/10 bg-[#181820] text-left shadow-[0_16px_30px_rgba(0,0,0,0.28)] transition-transform active:scale-[0.98]"
     >
       <div className="relative h-32 overflow-hidden bg-[#253ba2]">
-        <img src={HERO_IMAGE} alt="" className="h-full w-full object-cover object-[55%_70%] opacity-90" />
+        <img src={match.stadiumImageUrl || HERO_IMAGE} alt="" className="h-full w-full object-cover object-[55%_70%] opacity-90" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#121219] via-transparent to-transparent" />
         <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-extrabold ${live ? "bg-lime text-[#08080f]" : "bg-white/15 text-white"}`}>
           {live ? `${match.time} LIVE` : "UPCOMING"}
@@ -48,6 +49,7 @@ export default function MarketplaceScreen({ initialMoments = [] }: { initialMome
   const moments = useAppStore((s) => s.moments);
   const userWallet = useAppStore((s) => s.userWallet);
   const setSuggestedCheckIn = useAppStore((s) => s.setSuggestedCheckIn);
+  const setSelectedMoment = useAppStore((s) => s.setSelectedMoment);
   const router = useRouter();
 
   const matches = useMemo(() => {
@@ -58,6 +60,11 @@ export default function MarketplaceScreen({ initialMoments = [] }: { initialMome
   const openMatch = (match: Match) => {
     setSuggestedCheckIn(`${match.location} (${match.teamHomeSymbol} vs ${match.teamAwaySymbol})`);
     router.push("/snap");
+  };
+
+  const openMoment = (moment: Moment) => {
+    setSelectedMoment(moment);
+    router.push(`/detail?id=${encodeURIComponent(moment.id)}`);
   };
 
   return (
@@ -136,6 +143,12 @@ export default function MarketplaceScreen({ initialMoments = [] }: { initialMome
           >
             <span className="material-symbols-outlined text-[22px]">photo_camera</span>
           </button>
+        </div>
+
+        <div className="mt-5 flex flex-col gap-3 pb-8">
+          {(moments.length ? moments : initialMoments).map((moment) => (
+            <ExploreMomentCard key={moment.id} moment={moment} onOpen={() => openMoment(moment)} />
+          ))}
         </div>
       </div>
     </div>

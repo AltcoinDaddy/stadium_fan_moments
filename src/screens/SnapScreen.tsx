@@ -75,7 +75,7 @@ export default function SnapScreen() {
         <div className="flex w-full items-center justify-between">
           <button
             onClick={() => router.push("/marketplace")}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-ink transition-transform active:scale-90"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-black transition-transform active:scale-90"
           >
             <span className="material-symbols-outlined text-lg">close</span>
           </button>
@@ -84,7 +84,7 @@ export default function SnapScreen() {
             <button
               onClick={() => setIsFlashOn(!isFlashOn)}
               className={`flex h-10 w-10 items-center justify-center rounded-full transition-transform active:scale-90 ${
-                isFlashOn ? "bg-lime text-ink" : "bg-white text-ink"
+                isFlashOn ? "bg-lime text-black" : "bg-white text-black"
               }`}
             >
               <span className="material-symbols-outlined text-lg">
@@ -94,7 +94,7 @@ export default function SnapScreen() {
             <button
               onClick={requestCamera}
               aria-label="Switch camera"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-ink transition-transform active:scale-90"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-black transition-transform active:scale-90"
             >
               <span className="material-symbols-outlined text-lg">cameraswitch</span>
             </button>
@@ -162,7 +162,7 @@ export default function SnapScreen() {
               key={tag}
               onClick={() => setActiveCaptureTag(tag)}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-[10px] font-bold tracking-wide transition-colors ${
-                activeCaptureTag === tag ? "bg-lime text-ink" : "bg-white/15 text-white"
+                activeCaptureTag === tag ? "bg-lime text-black" : "bg-white/15 text-white"
               }`}
             >
               {tag}
@@ -174,7 +174,7 @@ export default function SnapScreen() {
           <button
             aria-label="Open photo library"
             onClick={() => window.alert("Mintable moments must be captured live with the stadium camera.")}
-            className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white text-ink transition-transform active:scale-95"
+            className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white text-black transition-transform active:scale-95"
           >
             <span className="material-symbols-outlined text-xl">photo_library</span>
           </button>
@@ -213,7 +213,7 @@ export default function SnapScreen() {
           <button
             aria-label="Switch camera"
             onClick={requestCamera}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-ink transition-transform active:scale-95"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-black transition-transform active:scale-95"
           >
             <span className="material-symbols-outlined text-xl">cameraswitch</span>
           </button>
